@@ -7,7 +7,6 @@
 #include "basic_typedef.h"
 #include "Scene.h"
 #include "Graph.h"
-#include "Kd_tree_d.h"
 #include <CGAL/Random.h>
 #include <boost/shared_ptr.hpp>
 

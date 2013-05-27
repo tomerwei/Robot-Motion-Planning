@@ -105,6 +105,12 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="RTT_tree_t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dRRT_tree_connector_t.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h">
@@ -131,8 +137,14 @@
     <ClInclude Include="Graph.h">
       <Filter>Header Files\Auxilary</Filter>
     </ClInclude>
+    <ClInclude Include="RTT_tree_t.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Kd_tree_d.h">
       <Filter>Header Files\Auxilary</Filter>
+    </ClInclude>
+    <ClInclude Include="dRRT_tree_connector_t.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
