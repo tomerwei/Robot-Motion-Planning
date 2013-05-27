@@ -5,6 +5,7 @@
 *.exe
 *.opensdf
 *.pdb
+*.dll
 */Debug/*
 */Release/*
 */ipch/*
