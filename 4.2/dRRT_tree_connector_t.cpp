@@ -9,9 +9,10 @@ dRRT_tree_connector_t::dRRT_tree_connector_t(const RRT_tree_t& lhs, const RRT_tr
 	for (size_t i(0); i < p; ++i)
 	{
 		Point_d q_rand = m_sampler.generate_sample();
-		Point_d q_0 = lhs.get_nearest(q_rand);
-		Point_d q_1 = rhs.get_nearest(q_rand);
-		if (local_connect(q_0,q1))
+		const Point_d 
+			q_0 = lhs.get_nearest(q_rand),
+			q_1 = rhs.get_nearest(q_rand);
+		if (local_connect(q_0,q_1))
 		{
 			m_lhs_conn_pt = q_0;
 			m_rhs_conn_pt = q_1;

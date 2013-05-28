@@ -24,3 +24,8 @@ void RRT_tree_t::expand(size_t samples)
 		}
 	}
 }
+
+const Point_d RRT_tree_t::get_nearest(const Point_d& nearest_to) const
+{
+	return m_knn_container.nearest_neighbor(nearest_to);
+}

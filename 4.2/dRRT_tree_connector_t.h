@@ -12,6 +12,8 @@ public:
 	const Point_d &lhs_conn_pt() const {return m_lhs_conn_pt; }
 	const Point_d &rhs_conn_pt() const {return m_rhs_conn_pt; }
 private:
+	bool local_connect(const Point_d& p1, const Point_d& p2);
+private:
 	Point_d m_lhs_conn_pt;
 	Point_d m_rhs_conn_pt;
 	bool m_succeeded;

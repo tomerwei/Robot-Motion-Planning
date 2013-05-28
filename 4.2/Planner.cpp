@@ -28,6 +28,9 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
+	size_t num_samples(100);
+
+
 	assert(m_start_confs.size() == 2);
 	Polygon_2 robot_poly1(m_robot_polygons[0]); //via loop on all m_robot_polygons
 	Polygon_2 robot_poly2(m_robot_polygons[1]); //via loop on all m_robot_polygons
@@ -48,16 +51,16 @@ void Planner::run()
 	CollisionDetector cdetector( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler sampler( robot_poly1, robot_poly2, m_room, cdetector );
 	
-	RRT_tree_t src_tree(m_start_confs);
-	RRT_tree_t tgt_tree(m_target_confs);
-	src_tree.expand();
-	src_tree.expand();
-	dRRT_tree_connector_t connector(src_tree,tgt_tree);
+	RRT_tree_t src_tree(m_start_confs, sampler);
+	RRT_tree_t tgt_tree(m_target_confs, sampler);
+	src_tree.expand(num_samples);
+	src_tree.expand(num_samples);
+	dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler);
 	if (connector.is_connected())
 	{
 		m_path = get_path(src_tree, connector.lhs_conn_pt());
 		m_path.push_back(get_path(connector));
-		m_path.push_back(get_path(dst_tree, connector.rhs_conn_pt());
+		m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
 	}
 	//	run this method when you finish to produce the path
 	//	IMPORTANT: the result should be put in m_path

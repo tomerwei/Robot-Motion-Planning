@@ -13,6 +13,7 @@ class RRT_tree_t
 public:
 	RRT_tree_t(const std::vector<Conf>& tree_root, const Sampler &sampler);
 	void expand(size_t samples);
+	const Point_d get_nearest(const Point_d& nearest_to) const;
 
 private:
 	std::vector<Conf> m_root;
