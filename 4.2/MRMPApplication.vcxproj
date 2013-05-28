@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionDetector.cpp" />
     <ClCompile Include="Connected_components.cpp" />
     <ClCompile Include="dRRT_tree_connector_t.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_GraphicsEllipse.cpp">
@@ -133,10 +134,12 @@
     <ClCompile Include="MRMPDrawingBox.cpp" />
     <ClCompile Include="Planner.cpp" />
     <ClCompile Include="RTT_tree_t.cpp" />
+    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h" />
+    <ClInclude Include="CollisionDetector.h" />
     <ClInclude Include="colors.h" />
     <ClInclude Include="Connected_components.h" />
     <ClInclude Include="dRRT_tree_connector_t.h" />
@@ -147,6 +150,7 @@
     <ClInclude Include="Kd_tree_d.h" />
     <ClInclude Include="Planner.h" />
     <ClInclude Include="RTT_tree_t.h" />
+    <ClInclude Include="Sampler.h" />
     <CustomBuild Include="Scene.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing Scene.h...</Message>

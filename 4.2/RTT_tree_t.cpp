@@ -1,10 +1,11 @@
 #include "RTT_tree_t.h"
 
 
-RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root)
+RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const Sampler &sampler)
 : m_root(tree_root)
 , m_knn_container()
 , m_tree()
+, m_sampler(sampler)
 {
 }
 
@@ -12,7 +13,7 @@ void RRT_tree_t::expand(size_t samples)
 {
 	for(size_t i(0); i < samples; ++i)
 	{
-		Point_d q_rand = random_sample();
+		Point_d q_rand = m_sampler.generate_sample();
 		Point_d q_near = m_knn_container.nearest_neighbor(q_rand);
 		Point_d q_new = something_direction_oracle(q_rand,q_near);
 

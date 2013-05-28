@@ -1,6 +1,7 @@
 #include "Planner.h"
 #include "RTT_tree_t.h"
 #include "dRRT_tree_connector_t.h"
+#include "Sampler.h"
 #include <CGAL/minkowski_sum_2.h>
 #include <CGAL/point_generators_2.h>
 #include <boost/make_shared.hpp>
@@ -27,6 +28,26 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
+	assert(m_start_confs.size() == 2);
+	Polygon_2 robot_poly1(m_robot_polygons[0]); //via loop on all m_robot_polygons
+	Polygon_2 robot_poly2(m_robot_polygons[1]); //via loop on all m_robot_polygons
+
+	std::vector<double> start;
+	start.push_back(CGAL::to_double(m_start_confs[0].x()));
+	start.push_back(CGAL::to_double(m_start_confs[0].y()));
+	start.push_back(CGAL::to_double(m_start_confs[1].x()));
+	start.push_back(CGAL::to_double(m_start_confs[1].y()));
+	Point_d      curr_start_conf(4,start.begin(),start.end());
+	std::vector<double> end;
+	end.push_back(CGAL::to_double(m_target_confs[0].x()));
+	end.push_back(CGAL::to_double(m_target_confs[0].y()));
+	end.push_back(CGAL::to_double(m_target_confs[1].x()));
+	end.push_back(CGAL::to_double(m_target_confs[1].y()));
+	Point_d      curr_end_conf(4,end.begin(),end.end());
+
+	CollisionDetector cdetector( robot_poly1, robot_poly2, &m_obstacles );
+	Sampler sampler( robot_poly1, robot_poly2, m_room, cdetector );
+	
 	RRT_tree_t src_tree(m_start_confs);
 	RRT_tree_t tgt_tree(m_target_confs);
 	src_tree.expand();
