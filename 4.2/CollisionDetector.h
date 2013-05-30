@@ -206,6 +206,7 @@ public:
   Polygon_2     approx_robot1;
   Polygon_2     approx_robot2;
   mutable std::vector<Point_2> m_translate_helper; //mutable so that the methods for do_valid can remain const
+  Polygon_2 m_minus_r1;
 };
 
 #endif

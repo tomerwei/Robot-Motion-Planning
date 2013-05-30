@@ -5,13 +5,14 @@ CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacl
 , approx_robot2(robot2)
 , m_obs(obs)
 , m_translate_helper()
+, m_minus_r1()
 {
 	for(int i = 0; i < approx_robot1.size(); ++i)
 	{
 		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
 		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
 	}
-	Polygon_2 minus_r1(m_translate_helper.begin(), m_translate_helper.end());
+	m_minus_r1 = Polygon_2(m_translate_helper.begin(), m_translate_helper.end());
 	m_translate_helper.resize(0);
 	for(int i = 0; i < approx_robot2.size(); ++i)
 	{
@@ -27,7 +28,7 @@ CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacl
 				m_obs->begin(); iter != m_obs->end(); iter++)
 		{
 			// For every obstacle calculate its Minkowski sum with the "robot"
-			Polygon_with_holes_2  poly_wh1 = minkowski_sum_2(*iter, minus_r1);
+			Polygon_with_holes_2  poly_wh1 = minkowski_sum_2(*iter, m_minus_r1);
 			Polygon_with_holes_2  poly_wh2 = minkowski_sum_2(*iter, minus_r2);
 
 			// Add the result to the polygon set
@@ -62,17 +63,14 @@ bool CollisionDetector::do_moved_robots_interesct(
 	const Point_2& r2_new
 ) const
 {
-	Polygon_2 r1 = translate_polygon_to(robot1,r1_new);
-	Polygon_set_2 ps_r1;
-	if (!r1.is_counterclockwise_oriented()) r1.reverse_orientation();
-	ps_r1.insert(r1);
-
 	Polygon_2 r2 = translate_polygon_to(robot2,r2_new);
 	Polygon_set_2 ps_r2;
 	if (!r2.is_counterclockwise_oriented()) r2.reverse_orientation();
 	ps_r2.insert(r2);
 
-	return ps_r1.do_intersect(ps_r2);
+	Polygon_with_holes_2  poly_wh1 = minkowski_sum_2(r2, m_minus_r1);
+	Polygon_set_2 ps; ps.insert(poly_wh1);
+	return ps.oriented_side(r1_new) == CGAL::ON_BOUNDED_SIDE;
 }
 
 bool CollisionDetector::valid_conf( const Point_d &pos ) const
