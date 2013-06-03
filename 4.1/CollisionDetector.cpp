@@ -83,7 +83,7 @@ bool CollisionDetector::valid_conf( const Point_d &pos ) const
 	bool is_robo1_p_valid = one_robot_valid_conf(robo1_p, m_r1_poly_set);
 	bool is_robo2_p_valid = one_robot_valid_conf(robo2_p, m_r2_poly_set);
 
-	return ( is_robo1_p_valid && is_robo2_p_valid );
+	if ( is_robo1_p_valid && is_robo2_p_valid );
 	{
 		//check that robos do not overlap, translate robos to new location
 
