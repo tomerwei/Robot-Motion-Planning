@@ -16,46 +16,7 @@ public:
    * radius  - radius of robot
    * Room  - describes the boundary of the scenario
    */
-  CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs):
-	  approx_robot1(robot1), approx_robot2(robot2), m_obs(obs)
-  {
-    //  Approximates the disc robot with a polygon
-
-    /*  TODO: generate the approx_robot polygon.
-     * We need to extend the robot polygon by doing a minkowski sum with a circle
-     * or something
-     *
-        Below is an example of a coarse approximation:*/
-	std::vector<Point_2> v;
-	for(int i = 0; i < approx_robot1.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
-		v.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	Polygon_2 minus_r1(v.begin(), v.end());
-	v.resize(0);
-	for(int i = 0; i < approx_robot2.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - approx_robot2.vertex(i);
-		v.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	Polygon_2 minus_r2(v.begin(), v.end());
-
-    // Construction of the polygon set, used for collision detection
-    if (!m_obs->empty()) {
-      for (Obstacles::iterator iter =
-             m_obs->begin(); iter != m_obs->end(); iter++)
-      {
-        // For every obstacle calculate its Minkowski sum with the "robot"
-        Polygon_with_holes_2  poly_wh1 = minkowski_sum_2(*iter, minus_r1);
-        Polygon_with_holes_2  poly_wh2 = minkowski_sum_2(*iter, minus_r2);
-
-        // Add the result to the polygon set
-        m_r1_poly_set.join(poly_wh1);
-        m_r2_poly_set.join(poly_wh2);
-      }
-    }
-  }
+  CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs);
   
   ~CollisionDetector() {};
 
@@ -64,40 +25,11 @@ public:
   ////////////////////////
 
 
-  Polygon_2 translate_polygon_to(const Polygon_2& poly, const Point_2& new_ref_pt)
-  {
-	  std::vector<Point_2> translated;
-	  const Point_2 &ref = *poly.left_vertex();
-	  std::pair<double,double> diff(
-	  //Vector_2 diff(
-			CGAL::to_double(ref.x().exact()) - CGAL::to_double(new_ref_pt.x().exact()), 
-		  CGAL::to_double(ref.y().exact()) - CGAL::to_double(new_ref_pt.y().exact())
-		);
-  	  for (Polygon_2::Vertex_const_iterator it = poly.vertices_begin(), it_end = poly.vertices_end(); it != it_end; ++it)
-  	  {
-		  translated.push_back( Point_2(CGAL::to_double(it->x()) + diff.first, CGAL::to_double(it->y()) + diff.second ) );
-		  //translated.push_back( (*it) + diff );
-  	  }
-  	  Polygon_2 new_poly(translated.begin(),translated.end());
-  	  return new_poly;
-  }
+  Polygon_2 translate_polygon_to(const Polygon_2& poly, const Point_2& new_ref_pt) const;
 
-  bool do_moved_robots_interesct(const Polygon_2 &robot1, const Polygon_2 &robot2, const Point_2 &r1_new, const Point_2& r2_new)
-  {
-	  Polygon_2 r1 = translate_polygon_to(robot1,r1_new);
-	  Polygon_set_2 ps_r1;
-	  if (!r1.is_counterclockwise_oriented()) r1.reverse_orientation();
-	  ps_r1.insert(r1);
+  bool do_moved_robots_interesct(const Polygon_2 &robot1, const Polygon_2 &robot2, const Point_2 &r1_new, const Point_2& r2_new) const;
 
-	  Polygon_2 r2 = translate_polygon_to(robot2,r2_new);
-	  Polygon_set_2 ps_r2;
-	  if (!r2.is_counterclockwise_oriented()) r2.reverse_orientation();
-	  ps_r2.insert(r2);
-
-	  return ps_r1.do_intersect(ps_r2);
-  }
-
-  bool one_robot_valid_conf(const Point_2 &pos, const Polygon_set_2& poly_set)
+  bool one_robot_valid_conf(const Point_2 &pos, const Polygon_set_2& poly_set) const
   {
 	  return poly_set.oriented_side(pos) == CGAL::ON_NEGATIVE_SIDE;
   }
@@ -105,30 +37,7 @@ public:
   /* Check if the given configuration is collision free (returns true for
    * free samples)
    */
-  bool valid_conf( const Point_d &pos )
-  {
-	  //Point
-	  bool   res   =   false;
-	  Point_2 robo1_p( pos.cartesian(0),pos.cartesian(1) );
-	  Point_2 robo2_p( pos.cartesian(2),pos.cartesian(3) );
-
-	  bool is_robo1_p_valid = one_robot_valid_conf(robo1_p, m_r1_poly_set);
-	  bool is_robo2_p_valid = one_robot_valid_conf(robo2_p, m_r2_poly_set);
-
-	  return ( is_robo1_p_valid && is_robo2_p_valid );
-	  {
-		  //check that robos do not overlap, translate robos to new location
-
-		  res = !do_moved_robots_interesct( approx_robot1, approx_robot2,
-				     	  	  	  	  	  	robo1_p, robo2_p );
-	  }
-
-	  return res;
-  }
-
-
-
-
+  bool valid_conf( const Point_d &pos ) const;
 
   /* Validate the connection between two configurations by 
    * sampling along a line.
@@ -296,6 +205,8 @@ public:
   Polygon_set_2 m_r1_poly_set,m_r2_poly_set;     // Polygon set, for collision detection
   Polygon_2     approx_robot1;
   Polygon_2     approx_robot2;
+  mutable std::vector<Point_2> m_translate_helper; //mutable so that the methods for do_valid can remain const
+  Polygon_2 m_minus_r1;
 };
 
 #endif
