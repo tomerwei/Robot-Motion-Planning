@@ -45,13 +45,13 @@ void Planner::run()
 	end.push_back(CGAL::to_double(m_target_confs[1].y()));
 	Point_d      curr_end_conf(4,end.begin(),end.end());
 
-	CollisionDetector* m_collision = new CollisionDetector( robot_poly1, robot_poly2, &m_obstacles );
-	Sampler*           m_sampler   = new Sampler( robot_poly1, robot_poly2, m_room, m_collision );
+	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
+	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
 
     // An example
 
 
-      Prm roadmap = Prm( 300, 12, m_collision,
+      Prm roadmap( 300, 12, m_collision,
                          m_sampler, curr_start_conf, curr_end_conf);
       roadmap.generate_roadmap();
       //loop end

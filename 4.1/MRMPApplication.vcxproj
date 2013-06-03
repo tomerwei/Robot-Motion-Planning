@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionDetector.cpp" />
     <ClCompile Include="Connected_components.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_GraphicsEllipse.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -131,6 +132,8 @@
     <ClCompile Include="mrmpapplication.cpp" />
     <ClCompile Include="MRMPDrawingBox.cpp" />
     <ClCompile Include="Planner.cpp" />
+    <ClCompile Include="Prm.cpp" />
+    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
