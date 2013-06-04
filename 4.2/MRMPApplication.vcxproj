@@ -149,6 +149,7 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Kd_tree_d.h" />
     <ClInclude Include="Planner.h" />
+    <ClInclude Include="Prm.h" />
     <ClInclude Include="RTT_tree_t.h" />
     <ClInclude Include="Sampler.h" />
     <CustomBuild Include="Scene.h">

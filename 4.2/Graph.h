@@ -3,6 +3,7 @@
 
 #include "Connected_components.h"
 #include "basic_typedef.h"
+#include <boost/graph/adjacency_list.hpp>
 
 ////////////////////////////////////////////////////////////////////////////
 // The graph is templated
@@ -66,6 +67,7 @@ protected:
   }
 
 public:
+  typedef Boost_graph::adjacency_iterator adjacency_iterator;
   Graph(int initial_size = 0, int use_connected_components = false) :
     _curr_id(0), _use_connected_components(use_connected_components)
   {
@@ -182,6 +184,21 @@ public:
                 
     Node next_optimal = path[1];
     return &next_optimal;
+  }
+
+  Node* node_by_id(int id) const
+  {
+	  return this->_id_node_map[id];
+  }
+
+  std::pair<typename Boost_graph::adjacency_iterator,
+                     typename Boost_graph::adjacency_iterator> get_neighbors(const Node& node) const
+  {
+	  std::map<Node, int>::const_iterator it = _node_id_map.find(node);
+	  assert(it != _node_id_map.end());
+
+	  int id = it->second;
+	  return adjacent_vertices(id, *_graph);
   }
 
   // cc utils

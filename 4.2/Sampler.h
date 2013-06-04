@@ -27,8 +27,7 @@ private:
 
 public:
   Sampler(//double radius,
-		   Polygon_2 robot1,
-		   Polygon_2 robot2,
+		   Polygon_2 robot,
 		   Room room, const CollisionDetector &col, double seed = -1);
 
   ~Sampler(void) { }
@@ -52,8 +51,7 @@ private:
   ////////////////////////
   //double m_radius;              // radius of robots
 
-  Polygon_2 m_robot1;
-  Polygon_2 m_robot2;
+  Polygon_2 m_robot;
   Room m_room;                  // Represents the boundaries of the scenario
   const CollisionDetector &m_col;     // Collision detector
 
@@ -62,6 +60,5 @@ private:
   Point_2 br;
 
   robot_bounds r1;
-  robot_bounds r2;
 };
 #endif

@@ -1,4 +1,5 @@
 #include "Planner.h"
+#include "Prm.h"
 #include "RTT_tree_t.h"
 #include "dRRT_tree_connector_t.h"
 #include "Sampler.h"
@@ -28,31 +29,28 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
-	size_t num_samples(100);
+	size_t num_samples(300);
 
 
 	assert(m_start_confs.size() == 2);
 	Polygon_2 robot_poly1(m_robot_polygons[0]); //via loop on all m_robot_polygons
 	Polygon_2 robot_poly2(m_robot_polygons[1]); //via loop on all m_robot_polygons
 
-	std::vector<double> start;
-	start.push_back(CGAL::to_double(m_start_confs[0].x()));
-	start.push_back(CGAL::to_double(m_start_confs[0].y()));
-	start.push_back(CGAL::to_double(m_start_confs[1].x()));
-	start.push_back(CGAL::to_double(m_start_confs[1].y()));
-	Point_d      curr_start_conf(4,start.begin(),start.end());
-	std::vector<double> end;
-	end.push_back(CGAL::to_double(m_target_confs[0].x()));
-	end.push_back(CGAL::to_double(m_target_confs[0].y()));
-	end.push_back(CGAL::to_double(m_target_confs[1].x()));
-	end.push_back(CGAL::to_double(m_target_confs[1].y()));
-	Point_d      curr_end_conf(4,end.begin(),end.end());
+	CollisionDetector cdetector1( robot_poly1, &m_obstacles );
+	Sampler sampler1( robot_poly1, m_room, cdetector1 );
 
-	CollisionDetector cdetector( robot_poly1, robot_poly2, &m_obstacles );
-	Sampler sampler( robot_poly1, robot_poly2, m_room, cdetector );
-	
-	RRT_tree_t src_tree(m_start_confs, sampler);
-	RRT_tree_t tgt_tree(m_target_confs, sampler);
+	Prm roadmap1( num_samples, 12, cdetector1, sampler1, m_start_confs[0], m_target_confs[0]);
+
+	CollisionDetector cdetector2( robot_poly2, &m_obstacles );
+	Sampler sampler2( robot_poly2, m_room, cdetector2 );
+
+	Prm roadmap2( num_samples, 12, cdetector1, sampler1, m_start_confs[1], m_target_confs[1]);
+
+	//todo: check both roadmaps have a path?
+
+	RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2);
+	RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2);
+
 	src_tree.expand(num_samples);
 	src_tree.expand(num_samples);
 	dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler);
