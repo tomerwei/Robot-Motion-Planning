@@ -76,6 +76,7 @@ private:
   int m_k_nearest;                      // maximal degree of vertex in roadmap
   const CollisionDetector &m_col;
   const Sampler &m_sampler;
+  LocalPlanner m_loc_planner;
   Graph<int, Less_than_int>* m_graph;   //  Graph structure
   Kd_tree_d<Kernel_d> m_kd_tree;         //  Kd-tree for nearest neighbor search
   Point_d m_start,m_target;             //  Start and target configurations

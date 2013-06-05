@@ -2,10 +2,6 @@
 #define COLLLISION_DETECTOR_H
 
 #include "basic_typedef.h"
-#include <CGAL/squared_distance_2.h>
-#include <CGAL/minkowski_sum_2.h>
-#include <CGAL/intersections.h>
-#include <CGAL/convex_hull_2.h>
 
 class CollisionDetector {
 public:  

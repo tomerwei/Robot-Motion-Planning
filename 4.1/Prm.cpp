@@ -9,6 +9,7 @@ Prm::Prm(int number_vertices,
 ,m_k_nearest(k_nearest)                      // maximal degree of vertex in roadmap
 ,m_col(col)
 ,m_sampler(sampler)
+,m_loc_planner(m_col)
 ,m_graph(NULL)   //  Graph structure
 ,m_kd_tree()         //  Kd-tree for nearest neighbor search
 ,m_start(start)
@@ -44,7 +45,7 @@ void Prm::add_edges( const Point_d &p, int K, double EPS )
 		//if(m_graph->is_in_graph(pIt->second) && m_graph->is_in_graph(qIt->second) && !m_graph->is_in_same_cc( pIt->second, qIt->second ) )
 		{
 
-			bool is_connect_success =  m_col.local_planner( p, *q, EPS );
+			bool is_connect_success =  m_loc_planner.local_planner( p, *q, EPS );
 
 			if( is_connect_success )
 			{
