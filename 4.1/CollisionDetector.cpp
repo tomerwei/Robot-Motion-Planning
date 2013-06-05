@@ -157,14 +157,14 @@ Polygon_2 LocalPlanner::approx_mink(const Segment_2& seg, const Polygon_2& poly)
 	Point_2 robo1_target( target.cartesian(0),target.cartesian(1) );
 	Point_2 robo2_target( target.cartesian(2),target.cartesian(3) );
 
-	if( !local_planner_one_robot(robo1_start,robo1_target,m_r1_poly_set,eps) ||
-		!local_planner_one_robot(robo2_start,robo2_target,m_r2_poly_set,eps) )
+	if( !local_planner_one_robot(robo1_start,robo1_target,m_cd.m_r1_poly_set,eps) ||
+		!local_planner_one_robot(robo2_start,robo2_target,m_cd.m_r2_poly_set,eps) )
 	{
 		return false;
 	}
 
 	Kernel::Segment_2 r1_p( robo1_start,robo1_target );
-	Polygon_2 r1_path = approx_mink( r1_p,approx_robot1 );
+	Polygon_2 r1_path = approx_mink( r1_p,m_cd.approx_robot1 );
     Polygon_set_2 ps_r1_p;
     if ( !r1_path.is_counterclockwise_oriented() )
     {
@@ -174,7 +174,7 @@ Polygon_2 LocalPlanner::approx_mink(const Segment_2& seg, const Polygon_2& poly)
 
 
 	Kernel::Segment_2 r2_p( robo2_start,robo2_target );
-	Polygon_2 r2_path = approx_mink( r2_p,approx_robot2 );
+	Polygon_2 r2_path = approx_mink( r2_p,m_cd.approx_robot2 );
 	Polygon_set_2 ps_r2_p;
 	if( !r2_path.is_counterclockwise_oriented() )
 	{
