@@ -63,5 +63,7 @@ private:
 
   robot_bounds r1;
   robot_bounds r2;
+
+  mutable std::vector<double> coords;
 };
 #endif
