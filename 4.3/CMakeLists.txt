@@ -1,0 +1,75 @@
+# Created by the script cgal_create_cmake_script
+# This is the CMake script for compiling a CGAL application.
+
+project (mrmp)
+
+cmake_minimum_required(VERSION 2.4.5)
+
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
+if ( COMMAND cmake_policy )
+  cmake_policy( SET CMP0003 NEW )  
+endif()
+
+find_package(CGAL COMPONENTS Qt4)
+find_package( Boost COMPONENTS program_options REQUIRED )
+find_package( Boost COMPONENTS filesystem REQUIRED )
+
+include_directories( ${Boost_INCLUDE_DIR} )
+
+include(${CGAL_USE_FILE})
+
+set( QT_USE_QTXML    TRUE )
+set( QT_USE_QTMAIN   TRUE )
+set( QT_USE_QTSCRIPT  TRUE )
+set( QT_USE_QTOPENGL  TRUE )
+
+
+find_package(Qt4)
+include_directories (BEFORE .)
+
+
+if ( CGAL_FOUND AND CGAL_Qt4_FOUND AND QT4_FOUND )
+
+  include(${QT_USE_FILE})
+
+  #--------------------------------
+  # UI files (Qt Designer files)
+  qt4_wrap_ui( APP_UI_FILES MRMPApplication.ui )
+  qt4_wrap_ui( DB_UI_FILES MRMPDrawingBox.ui )
+
+  # qrc files (resources files, that contain icons, at least)
+  qt4_add_resources ( DT_RESOURCE_FILES MRMPApplication.qrc )
+
+  # use the Qt MOC preprocessor on classes that derives from QObject
+  qt4_wrap_cpp( MRMPApplication_MOC MRMPApplication.h )
+  qt4_wrap_cpp( MRMPDrawingBox_MOC MRMPDrawingBox.h )
+  qt4_wrap_cpp( GraphicsEllipse_MOC GraphicsEllipse.h )
+  qt4_wrap_cpp( GraphicsPolygon_MOC GraphicsPolygon.h )
+  qt4_wrap_cpp( Scene_MOC Scene.h )
+
+  # The executable itself.
+  add_executable  ( mrmp
+    Connected_components.cpp
+    MRMPDrawingBox.cpp
+    MRMPApplication.cpp
+    main.cpp
+    GraphicsEllipse.cpp
+    GraphicsPolygon.cpp
+    Scene.cpp
+    Planner.cpp
+    ${APP_UI_FILES} ${DB_UI_FILES}
+    ${DT_RESOURCE_FILES}
+    ${MRMPApplication_MOC}
+    ${MRMPDrawingBox_MOC} ${GraphicsEllipse_MOC}  ${GraphicsPolygon_MOC} ${Scene_MOC})
+
+  add_to_cached_list( CGAL_EXECUTABLE_TARGETS mrmp )
+
+  # Link with Qt libraries
+  target_link_libraries( mrmp ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES})
+
+else()
+
+  message(STATUS "NOTICE: This demo requires CGAL and Qt4, and will not be compiled.")
+
+endif()
