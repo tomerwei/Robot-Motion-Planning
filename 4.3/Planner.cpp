@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Planner::Planner(Scene* scene) : m_scene(scene)
+Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) : m_scene(scene)
 {
 	/*	this method extracts information regarding the scenario from the 
 		gui and initializes the fields 

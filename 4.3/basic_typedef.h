@@ -68,5 +68,8 @@ typedef pair<QPointF,double>						QConf;
 typedef CGAL::Cartesian_d<double> Kernel_d;
 typedef Kernel_d::Point_d Point_d;
 
+typedef CGAL::Exact_predicates_inexact_constructions_kernel	Kernel_ie;
+typedef Kernel_ie::Point_2					Point_2_ie;
+typedef Kernel_ie::Vector_2					Vector_2_ie;
 
 #endif

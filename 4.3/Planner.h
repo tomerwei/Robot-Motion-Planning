@@ -23,7 +23,7 @@ public:
 	// C'tors & D'tors
 	////////////////////////
 
-	Planner(Scene* scene);
+	Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality);
 
 	~Planner(void);
 
