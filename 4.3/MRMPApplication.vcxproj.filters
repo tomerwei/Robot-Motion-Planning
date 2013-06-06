@@ -108,10 +108,10 @@
     <ClCompile Include="Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionDetector.cpp">
+    <ClCompile Include="Prm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Prm.cpp">
+    <ClCompile Include="CollisionDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -144,6 +144,12 @@
       <Filter>Header Files\Auxilary</Filter>
     </ClInclude>
     <ClInclude Include="Prm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
