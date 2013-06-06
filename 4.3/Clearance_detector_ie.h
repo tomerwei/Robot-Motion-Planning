@@ -1,18 +1,18 @@
-#ifndef CLEARANCE_H
-#define CLEARANCE_H
+#ifndef CLEARANCE_IE_H
+#define CLEARANCE_IE_H
 
 #include "basic_typedef.h"
 #include <CGAL/minkowski_sum_2.h>
 #include "Kd_tree.h"
 
-class Clearance_detector
+class Clearance_detector_ie
 {
 public:
 	
 	////////////////////////
 	// CTORS
 	////////////////////////
-	Clearance_detector(	vector<Polygon_2> *obstacles, 
+	Clearance_detector_ie(	vector<Polygon_2> *obstacles, 
 						Polygon_2 robot, 
 						double eps) :	m_obstacles(obstacles), 
 										m_robot(robot),
@@ -46,8 +46,8 @@ public:
 
 	void generate_clearance_structure()
 	{
-		m_kd_tree = new Kd_tree_2<Kernel>();
-		vector<Point_2>	points;
+		m_kd_tree = new Kd_tree_2<Kernel_ie>();
+		vector<Point_2_ie>	points;
 		int num = m_arr->number_of_vertices();
 		for (Arrangement_2::Vertex_iterator vit = m_arr->vertices_begin(); 
 				vit != m_arr->vertices_end(); ++vit)
@@ -55,7 +55,7 @@ public:
 			if (vit->is_at_open_boundary())
 				continue;
 			Point_2 p = vit->point();
-			points.push_back(p);
+			points.push_back(to_ie(p));
 		}
 
 		for (Arrangement_2::Edge_iterator	eit = m_arr->edges_begin(); 
@@ -73,21 +73,21 @@ public:
 			{
 				double ratio = ((double)i / step_num);
 				Point_2 p_in_step = p_source + ratio * vec;
-				points.push_back(p_in_step);
+				points.push_back(to_ie(p_in_step));
 			}
 		}
 
 		for (int i = 0; i < points.size(); i++)
 		{
-			std::cout << "( " << CGAL::to_double(points[i].x()) << ", " << CGAL::to_double(points[i].y()) << ")\n";
+			//std::cout << "( " << CGAL::to_double(points[i].x()) << ", " << CGAL::to_double(points[i].y()) << ")\n";
 		}
 
 		m_kd_tree->insert(points.begin(), points.end()); 
 	}
 
-	double clearance(Point_2 point)
+	double clearance(Point_2_ie point)
 	{
-		Point_2 p_nearest = m_kd_tree->nearest_neighbor(point);
+		Point_2_ie p_nearest = m_kd_tree->nearest_neighbor(point);
 		return distance(p_nearest, point);
 	}
 
@@ -105,13 +105,23 @@ public:
 
 	double			distance(Conf s, Conf t)
 	{
-		double x1 = CGAL::to_double(s.x());
-		double y1 = CGAL::to_double(s.y()) ;
-		double x2 = CGAL::to_double(t.x()) ;
-		double y2 = CGAL::to_double(t.y()) ;
+		return distance(to_ie(s),to_ie(t));
+	}
+
+	double			distance(Point_2_ie s, Point_2_ie t)
+	{
+		double x1 = s.x();
+		double y1 = s.y() ;
+		double x2 = t.x() ;
+		double y2 = t.y() ;
 
 		double dist = sqrt(pow(x1 - x2, 2) + pow(y1 - y2,2));
 		return dist;
+	}
+
+	Point_2_ie	to_ie(Point_2 p)
+	{
+		return Point_2_ie(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
 	}
 
 	void			turn_counterclockwise(Polygon_2& p)
@@ -128,7 +138,7 @@ public:
 	vector<Polygon_2>*					m_obstacles;
 	Polygon_2							m_robot;
 	double								m_eps;
-	Kd_tree_2<Kernel>*					m_kd_tree;
+	Kd_tree_2<Kernel_ie>*					m_kd_tree;
 };
 
 #endif // CLEARANCE_H
