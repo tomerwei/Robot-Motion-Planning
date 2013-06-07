@@ -25,6 +25,32 @@ namespace {
 			return sqrt(r1_sq) + sqrt(r2_sq);
 		}
 	};
+
+	struct combo_dmetric : public HGraph::distance_metric {
+		combo_dmetric(double alpha)
+			:m_alpha(alpha) {}
+
+		virtual double do_measure( const Point_d& lhs, const Point_d& rhs) const
+		{
+			const Point_2 r1_lhs(lhs.cartesian(0),lhs.cartesian(1)),
+				r2_lhs(lhs.cartesian(2),lhs.cartesian(3)),
+				r1_rhs(rhs.cartesian(0),rhs.cartesian(1)),
+				r2_rhs(rhs.cartesian(2),rhs.cartesian(3));
+
+			double r1_sq = CGAL::to_double(CGAL::squared_distance(r1_lhs,r1_rhs)),
+				r2_sq = CGAL::to_double(CGAL::squared_distance(r2_lhs,r2_rhs));
+
+			double r1_l = sqrt(r1_sq),
+				r2_l = sqrt(r2_sq);
+			
+			double r1_c, r2_c;
+
+			return (r1_l / pow(r1_c,m_alpha)) + (r2_l / pow(r2_c,m_alpha));
+		}
+
+	private:
+		double m_alpha;
+	};
 }
 
 
@@ -73,10 +99,14 @@ void Planner::run()
 
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
-	HGraph::distance_metric *dm;
+	std::auto_ptr<HGraph::distance_metric> dm;
 	if (m_what_to_optimize == OPT_TYPE_DISTANCE)
 	{
-		dm = new path_length_dmetric();
+		dm.reset( new path_length_dmetric() );
+	}
+	else //OPT_TYPE_COMBO
+	{
+		dm.reset( new combo_dmetric(m_alpha) );
 	}
 	HGraph hgraph(curr_start_conf,curr_end_conf, *dm);
 
