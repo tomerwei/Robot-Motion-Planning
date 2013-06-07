@@ -66,7 +66,7 @@ public:
 
   //  Returns a point path from start to target.
   //  If a path doesn't exist, returns empty vector.
-  vector<Point_d> retrieve_path()
+  const vector<Point_d>& retrieve_path() const
   {
 	return m_path;
   }

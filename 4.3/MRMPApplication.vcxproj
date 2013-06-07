@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h" />
+    <ClInclude Include="Clearance_detector_ie.h" />
     <ClInclude Include="CollisionDetector.h" />
     <ClInclude Include="colors.h" />
     <ClInclude Include="Connected_components.h" />
@@ -145,6 +146,7 @@
     <ClInclude Include="GeneratedFiles\ui_MRMPDrawingBox.h" />
     <ClInclude Include="get_bounding_circle_center.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="HGraph.h" />
     <ClInclude Include="Kd_tree_d.h" />
     <ClInclude Include="Planner.h" />
     <ClInclude Include="Prm.h" />

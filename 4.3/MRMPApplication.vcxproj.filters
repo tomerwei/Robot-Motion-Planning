@@ -152,6 +152,12 @@
     <ClInclude Include="Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Clearance_detector_ie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mrmpapplication.ui">

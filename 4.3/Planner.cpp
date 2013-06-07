@@ -1,14 +1,22 @@
 #include "Planner.h"
+#include "HGraph.h"
 #include <CGAL/minkowski_sum_2.h>
 #include <CGAL/point_generators_2.h>
 #include "Kd_tree_d.h"
 #include <boost/make_shared.hpp>
 #include <CGAL/Boolean_set_operations_2.h>
+#include <boost/date_time/microsec_time_clock.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/time.hpp>
 #include <cassert>
 
 using namespace std;
 
-Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) : m_scene(scene)
+Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) 
+: m_scene(scene)
+,m_what_to_optimize (measure ? OPT_TYPE_DISTANCE : OPT_TYPE_COMBO)
+,m_alpha (alpha)
+,m_seconds (time)
 {
 	/*	this method extracts information regarding the scenario from the 
 		gui and initializes the fields 
@@ -27,6 +35,8 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
+    boost::posix_time::ptime starts = boost::posix_time::microsec_clock::local_time();
+
 	//loop start
 	assert(m_start_confs.size() == 2);
 	Polygon_2 robot_poly1(m_robot_polygons[0]); //via loop on all m_robot_polygons
@@ -47,9 +57,11 @@ void Planner::run()
 
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
+	HGraph hgraph;
 
     // An example
-
+	int msec_passed = 0;
+	do{ // timer loop
 
       Prm roadmap( 300, 12, m_collision,
                          m_sampler, curr_start_conf, curr_end_conf);
@@ -57,8 +69,7 @@ void Planner::run()
       //loop end
 
     // retrieve path from PRM
-    vector<Point_d> path = roadmap.retrieve_path();
-
+	hgraph.push_back(roadmap.retrieve_path());
 
     // transform path to GUI and update the display in gui
     //transfrom_path(path);
@@ -67,6 +78,7 @@ void Planner::run()
 	/*	example of a dummy path that moves the robots from the start positions
 		to target, and back to start */
 	//m_path.push_back();
+	const std::vector<Point_d> &path(hgraph.get_path());
 	m_path.resize(path.size());
 	for(int i(0), sz(path.size()); i < sz; ++i)
 	{
@@ -77,4 +89,10 @@ void Planner::run()
 	//	run this method when you finish to produce the path
 	//	IMPORTANT: the result should be put in m_path
 	transform_path_for_gui();
+
+	boost::posix_time::ptime ends = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration msdiff =  ends - starts;
+	msec_passed = msdiff.total_milliseconds();
+	} //end timer loop
+	while(msec_passed < m_seconds*1000);
 }

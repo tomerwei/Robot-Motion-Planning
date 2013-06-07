@@ -176,6 +176,11 @@ private:
 	///////////////////////
 	// Data members
 	///////////////////////
+private:
+	enum opt_type{
+		OPT_TYPE_DISTANCE,
+		OPT_TYPE_COMBO
+	};
 
 	Scene*						m_scene;
 	vector<Polygon_2>			m_robot_polygons;
@@ -184,6 +189,9 @@ private:
 	Room						m_room;
 	int							m_robot_num;
 	vector<vector<Conf> >		m_path;			// path section - robot - configuration
+	opt_type					m_what_to_optimize;
+	double						m_alpha;
+	int							m_seconds;
 };
 
 
