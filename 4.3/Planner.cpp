@@ -56,7 +56,7 @@ void Planner::run()
 
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
-	HGraph hgraph;
+	HGraph hgraph(curr_start_conf,curr_end_conf);
 
     // An example
 	int msec_passed = 0;

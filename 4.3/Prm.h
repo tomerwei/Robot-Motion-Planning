@@ -19,22 +19,6 @@ struct Less_than_int
   }
 };
 
-struct point_d_less
-{
-	bool operator() (const Point_d& lhs, const Point_d& rhs)
-	{
-		if (lhs.dimension() < rhs.dimension()) return true;
-		if (rhs.dimension() < lhs.dimension()) return false;
-		
-		for(int i = 0; i < rhs.dimension(); ++i)
-		{
-			if (lhs.cartesian(i) < rhs.cartesian(i)) return true;
-			if (rhs.cartesian(i) < lhs.cartesian(i)) return false;
-		}
-		return false;
-	}
-};
-
 class Prm {
 	typedef map< Point_d, int, point_d_less > point_to_node_map_t;
 public:

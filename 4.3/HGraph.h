@@ -3,22 +3,6 @@
 #include "Graph.h"
 #include "basic_typedef.h"
 
-struct point_d_less
-{
-	bool operator()(const Point_d& lhs, const Point_d& rhs)
-	{
-		if (lhs.dimension() != rhs.dimension())
-			return lhs.dimension() < rhs.dimension();
-
-		for(int i = 0; i < lhs.dimension(); ++i)
-		{
-			if (lhs.cartesian(i) < rhs.cartesian(i))
-				return true;
-		}
-		return false;
-	}
-};
-
 class HGraph
 {
 public:

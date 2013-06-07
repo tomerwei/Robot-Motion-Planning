@@ -72,4 +72,20 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel	Kernel_ie;
 typedef Kernel_ie::Point_2					Point_2_ie;
 typedef Kernel_ie::Vector_2					Vector_2_ie;
 
+struct point_d_less
+{
+	bool operator() (const Point_d& lhs, const Point_d& rhs)
+	{
+		if (lhs.dimension() < rhs.dimension()) return true;
+		if (rhs.dimension() < lhs.dimension()) return false;
+		
+		for(int i = 0; i < rhs.dimension(); ++i)
+		{
+			if (lhs.cartesian(i) < rhs.cartesian(i)) return true;
+			if (rhs.cartesian(i) < lhs.cartesian(i)) return false;
+		}
+		return false;
+	}
+};
+
 #endif
