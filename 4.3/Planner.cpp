@@ -11,6 +11,23 @@
 
 using namespace std;
 
+namespace {
+	struct path_length_dmetric : public HGraph::distance_metric {
+		virtual double do_measure(const Point_d& lhs, const Point_d& rhs) const
+		{
+			const Point_2 r1_lhs(lhs.cartesian(0),lhs.cartesian(1)),
+				r2_lhs(lhs.cartesian(2),lhs.cartesian(3)),
+				r1_rhs(rhs.cartesian(0),rhs.cartesian(1)),
+				r2_rhs(rhs.cartesian(2),rhs.cartesian(3));
+
+			double r1_sq = CGAL::to_double(CGAL::squared_distance(r1_lhs,r1_rhs)),
+				r2_sq = CGAL::to_double(CGAL::squared_distance(r2_lhs,r2_rhs));
+			return sqrt(r1_sq) + sqrt(r2_sq);
+		}
+	};
+}
+
+
 Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) 
 : m_scene(scene)
 ,m_what_to_optimize (measure ? OPT_TYPE_DISTANCE : OPT_TYPE_COMBO)
@@ -56,7 +73,12 @@ void Planner::run()
 
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
-	HGraph hgraph(curr_start_conf,curr_end_conf, );
+	HGraph::distance_metric *dm;
+	if (m_what_to_optimize == OPT_TYPE_DISTANCE)
+	{
+		dm = new path_length_dmetric();
+	}
+	HGraph hgraph(curr_start_conf,curr_end_conf, *dm);
 
     // An example
 	int msec_passed = 0;

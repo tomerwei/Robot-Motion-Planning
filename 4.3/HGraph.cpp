@@ -1,20 +1,6 @@
 #include "HGraph.h"
 #include <cassert>
 
-namespace {
-	double path_length_dmetric(const Point_d& lhs, const Point_d& rhs)
-	{
-		const Point_2 r1_lhs(lhs.cartesian(0),lhs.cartesian(1)),
-			r2_lhs(lhs.cartesian(2),lhs.cartesian(3)),
-			r1_rhs(rhs.cartesian(0),rhs.cartesian(1)),
-			r2_rhs(rhs.cartesian(2),rhs.cartesian(3));
-
-		double r1_sq = CGAL::to_double(CGAL::squared_distance(r1_lhs,r1_rhs)),
-			r2_sq = CGAL::to_double(CGAL::squared_distance(r2_lhs,r2_rhs));
-		return sqrt(r1_sq) + sqrt(r2_sq);
-	}
-}
-
 HGraph::HGraph(const Point_d& start_pos, const Point_d& end_pos, const distance_metric& dm)
 :m_graph()
 ,m_distance_metric(dm)
