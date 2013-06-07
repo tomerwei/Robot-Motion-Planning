@@ -1,6 +1,5 @@
 #include "Planner.h"
 #include "HGraph.h"
-#include <CGAL/minkowski_sum_2.h>
 #include <CGAL/point_generators_2.h>
 #include "Kd_tree_d.h"
 #include <boost/make_shared.hpp>

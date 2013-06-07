@@ -14,6 +14,6 @@ public:
 
 private:
 	Graph<Point_d, point_d_less> m_graph;
-}
+};
 
 #endif //__HGRAPH_INCLUDED__
