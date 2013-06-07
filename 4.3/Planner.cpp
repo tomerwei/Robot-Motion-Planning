@@ -56,7 +56,7 @@ void Planner::run()
 
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
-	HGraph hgraph(curr_start_conf,curr_end_conf);
+	HGraph hgraph(curr_start_conf,curr_end_conf, );
 
     // An example
 	int msec_passed = 0;
@@ -65,33 +65,29 @@ void Planner::run()
       Prm roadmap( 300, 12, m_collision,
                          m_sampler, curr_start_conf, curr_end_conf);
       roadmap.generate_roadmap();
-      //loop end
 
-    // retrieve path from PRM
-	hgraph.push_back(roadmap.retrieve_path());
+	  if (!roadmap.retrieve_path().empty())
+	  {
+      
+		// retrieve path from PRM
+		hgraph.push_back(roadmap.retrieve_path());
 
-    // transform path to GUI and update the display in gui
-    //transfrom_path(path);
+		const std::list<Point_d> &path(hgraph.get_path());
+		m_path.resize(path.size());
+		std::list<Point_d>::const_iterator it(path.begin()), it_end(path.end());
+		for(int i = 0; it != it_end; ++it, ++i)
+		{
+			m_path[i].push_back(Point_2(it->cartesian(0),it->cartesian(1)));
+			m_path[i].push_back(Point_2(it->cartesian(2),it->cartesian(3)));
+		}
 
-
-	/*	example of a dummy path that moves the robots from the start positions
-		to target, and back to start */
-	//m_path.push_back();
-	const std::vector<Point_d> &path(hgraph.get_path());
-	m_path.resize(path.size());
-	for(int i(0), sz(path.size()); i < sz; ++i)
-	{
-		m_path[i].push_back(Point_2(path[i].cartesian(0),path[i].cartesian(1)));
-		m_path[i].push_back(Point_2(path[i].cartesian(2),path[i].cartesian(3)));
-	}
-
-	//	run this method when you finish to produce the path
-	//	IMPORTANT: the result should be put in m_path
-	transform_path_for_gui();
-
-	boost::posix_time::ptime ends = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::time_duration msdiff =  ends - starts;
-	msec_passed = msdiff.total_milliseconds();
+		//	run this method when you finish to produce the path
+		//	IMPORTANT: the result should be put in m_path
+		transform_path_for_gui();
+	  }
+	  boost::posix_time::ptime ends = boost::posix_time::microsec_clock::local_time();
+	  boost::posix_time::time_duration msdiff =  ends - starts;
+	  msec_passed = msdiff.total_milliseconds();
 	} //end timer loop
 	while(msec_passed < m_seconds*1000);
 }
