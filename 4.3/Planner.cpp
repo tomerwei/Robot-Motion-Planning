@@ -11,7 +11,7 @@
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/time.hpp>
 #include <cassert>
-#include <math.h>
+#include <limits>
 
 
 using namespace std;
@@ -32,36 +32,30 @@ namespace {
 	};
 
 	struct combo_dmetric : public HGraph::distance_metric {
-		combo_dmetric(double alpha, double epsilon, const Clearance_detector_ie& cd_r1)
-			:m_alpha(alpha), m_epsilon {}
+		combo_dmetric(double alpha, double epsilon, const Clearance_detector_ie& cd_r1, const Clearance_detector_ie& cd_r2)
+			:m_alpha(alpha), m_epsilon(epsilon), m_cd_r1(cd_r1), m_cd_r2(cd_r2) {}
 
-		double clearance_along_path(const Point_2& lhs, const Point_2& rhs) const
+		double clearance_along_path(const Point_2& lhs, const Point_2& rhs, const Clearance_detector_ie& cd) const
 		{
-			Point_2_ie pt(lhs.x(),lhs.y());
-			double ret = std::min(INFINITY,m_cd_r1.clearance(pt));
+			const double lhs_x = CGAL::to_double(lhs.x()),
+				lhs_y = CGAL::to_double(lhs.y()),
+				rhs_x = CGAL::to_double(rhs.x()),
+				rhs_y = CGAL::to_double(rhs.y());
+
+			Point_2_ie pt(lhs_x,lhs_y);
+			double ret = std::min(numeric_limits<double>().max(),cd.clearance(pt));
 			double distance = CGAL::to_double(CGAL::squared_distance(lhs,rhs));
-			Vector_2_ie vec = Vector_2_ie(lhs,rhs) * m_epsilon / distance;
+			Vector_2_ie vec = Vector_2_ie(pt,Point_2_ie(rhs_x,rhs_y)) * m_epsilon / distance;
 			int num_steps = floor((distance - m_epsilon) / m_epsilon);
 			for(int i = 0; i < num_steps; ++i)
 			{
 				pt = pt + vec;
-				ret = std::min(ret,m_cd_r1.clearance(pt));
+				ret = std::min(ret,cd.clearance(pt));
 			}
 			
-			ret = std::min(ret,m_cd_r1.clearance(Point_2_ie(rhs.x(),rhs.y())));
+			ret = std::min(ret,cd.clearance(Point_2_ie(rhs_x,rhs_y)));
 
 			return ret;
-		}
-
-		double clearance_along_path(const Point_d& lhs, const Point_d& rhs) const
-		{
-			const Point_2 r1_lhs(lhs.cartesian(0),cartesian(1)),
-				r2_lhs(lhs.cartesian(2),lhs.cartesian(3)),
-				r1_rhs(rhs.cartesian(0),rhs.cartesian(1)),
-				r2_rhs(rhs.cartesian(2),rhs.cartesian(3));
-			
-			return clearance_along_path(r1_lhs,r1_rhs) + clearance_along_path(r2_lhs,r2_rhs);
-			
 		}
 
 		virtual double do_measure( const Point_d& lhs, const Point_d& rhs) const
@@ -77,15 +71,15 @@ namespace {
 			double r1_l = sqrt(r1_sq),
 				r2_l = sqrt(r2_sq);
 			
-			double r1_c = clearance_along_path(lhs,rhs,r1),
-				r2_c = clearance_along_path(lhs,rhs,r1);
+			double r1_c = clearance_along_path(r1_lhs,r1_rhs,m_cd_r1),
+				r2_c = clearance_along_path(r1_lhs,r1_rhs,m_cd_r2);
 
 			return (r1_l / pow(r1_c,m_alpha)) + (r2_l / pow(r2_c,m_alpha));
 		}
 
 	private:
 		const double m_alpha, m_epsilon;
-		const Clearance_detector_ie& m_cd_r1;
+		const Clearance_detector_ie& m_cd_r1, &m_cd_r2;
 	};
 }
 
@@ -139,13 +133,16 @@ void Planner::run()
 	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles,  EPS);
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
 	std::auto_ptr<HGraph::distance_metric> dm;
+	std::auto_ptr<Clearance_detector_ie> r1_cd, r2_cd;
 	if (m_what_to_optimize == OPT_TYPE_DISTANCE)
 	{
 		dm.reset( new path_length_dmetric() );
 	}
 	else //OPT_TYPE_COMBO
 	{
-		dm.reset( new combo_dmetric(m_alpha) );
+		r1_cd.reset(new Clearance_detector_ie(&m_obstacles,robot_poly1,EPS));
+		r2_cd.reset(new Clearance_detector_ie(&m_obstacles,robot_poly2,EPS));
+		dm.reset( new combo_dmetric(m_alpha, EPS, *r1_cd, *r2_cd) );
 	}
 	LocalPlanner lp(m_collision);
 	HGraph hgraph( curr_start_conf,curr_end_conf, *dm,lp );
@@ -171,10 +168,11 @@ void Planner::run()
 		std::list<Point_d>::const_iterator it(path.begin()), it_end(path.end());
 		for(int i = 0; it != it_end; ++it, ++i)
 		{
+			m_path[i].resize(0);
 			m_path[i].push_back(Point_2(it->cartesian(0),it->cartesian(1)));
 			m_path[i].push_back(Point_2(it->cartesian(2),it->cartesian(3)));
 		}
-
+		
 		//	run this method when you finish to produce the path
 		//	IMPORTANT: the result should be put in m_path
 		transform_path_for_gui();
@@ -186,4 +184,12 @@ void Planner::run()
 	  msec_passed = msdiff.total_milliseconds();
 	} //end timer loop
 	while (msec_passed < m_seconds*1000);
+
+	std::cout << "time's up" << std::endl;
+	if (!m_path.empty()) {
+		assert(m_path[0][0] == m_start_confs[0]);
+		assert(m_path[0][1] == m_start_confs[1]);
+		assert(m_path[m_path.size() - 1][0] == m_target_confs[0]);
+		assert(m_path[m_path.size() - 1][1] == m_target_confs[1]);
+	}
 }

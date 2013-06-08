@@ -161,6 +161,9 @@
     <ClInclude Include="HGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Kd_tree.h">
+      <Filter>Header Files\Auxilary</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mrmpapplication.ui">

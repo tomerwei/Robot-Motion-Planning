@@ -148,6 +148,7 @@
     <ClInclude Include="get_bounding_circle_center.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="HGraph.h" />
+    <ClInclude Include="Kd_tree.h" />
     <ClInclude Include="Kd_tree_d.h" />
     <ClInclude Include="Planner.h" />
     <ClInclude Include="Prm.h" />

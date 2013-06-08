@@ -52,9 +52,10 @@ void HGraph::push_back(const vector<Point_d>& path)
 	}
 
 	m_vertices.insert(path.begin(),path.end());
-	m_graph.clear_paths_to_target();
 	m_path.resize(0);
 	m_graph.find_weighted_path(m_start,m_target,m_path,m_distance);
+	assert(m_path.front() == m_start);
+	assert(m_path.back() == m_target);
 }
 
 const list<Point_d>& HGraph::get_path() const

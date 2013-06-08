@@ -12,7 +12,7 @@ public:
 	////////////////////////
 	// CTORS
 	////////////////////////
-	Clearance_detector_ie(	vector<Polygon_2> *obstacles, 
+	Clearance_detector_ie(	list<Polygon_2> *obstacles, 
 						Polygon_2 robot, 
 						double eps) :	m_obstacles(obstacles), 
 										m_robot(robot),
@@ -30,7 +30,7 @@ public:
 		Polygon_2 mirrored_robot = mirror_robot();
 		turn_counterclockwise(mirrored_robot);
 
-		for (vector<Polygon_2>::iterator iter = m_obstacles->begin();
+		for (list<Polygon_2>::iterator iter = m_obstacles->begin();
 				iter != m_obstacles->end(); iter++)
 		{
 			Polygon_2 obs = *iter;
@@ -85,7 +85,7 @@ public:
 		m_kd_tree->insert(points.begin(), points.end()); 
 	}
 
-	double clearance(Point_2_ie point)
+	double clearance(Point_2_ie point) const
 	{
 		Point_2_ie p_nearest = m_kd_tree->nearest_neighbor(point);
 		return distance(p_nearest, point);
@@ -103,12 +103,12 @@ public:
 		return result;
 	}
 
-	double			distance(Conf s, Conf t)
+	double			distance(Conf s, Conf t) const
 	{
 		return distance(to_ie(s),to_ie(t));
 	}
 
-	double			distance(Point_2_ie s, Point_2_ie t)
+	double			distance(Point_2_ie s, Point_2_ie t) const
 	{
 		double x1 = s.x();
 		double y1 = s.y() ;
@@ -119,7 +119,7 @@ public:
 		return dist;
 	}
 
-	Point_2_ie	to_ie(Point_2 p)
+	Point_2_ie	to_ie(Point_2 p) const
 	{
 		return Point_2_ie(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
 	}
@@ -135,7 +135,7 @@ public:
 	////////////////////////
 	//Ric_pl*								m_pl;
 	Arrangement_2*						m_arr;
-	vector<Polygon_2>*					m_obstacles;
+	list<Polygon_2>*					m_obstacles;
 	Polygon_2							m_robot;
 	double								m_eps;
 	Kd_tree_2<Kernel_ie>*					m_kd_tree;
