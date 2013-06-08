@@ -54,7 +54,7 @@ namespace {
 }
 
 
-Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) 
+Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf> >* path, double* quality) 
 : m_scene(scene)
 ,m_what_to_optimize (measure ? OPT_TYPE_COMBO : OPT_TYPE_DISTANCE)
 ,m_alpha (alpha)
