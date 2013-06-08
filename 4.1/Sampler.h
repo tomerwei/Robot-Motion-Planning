@@ -36,7 +36,7 @@ public:
   ////////////////////////
   // Queries
   ////////////////////////
-  
+
   /* Returns a point that represents a valid (free) configuration of the robot.
    */
   Point_d generate_sample() const;

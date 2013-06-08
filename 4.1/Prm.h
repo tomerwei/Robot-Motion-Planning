@@ -13,7 +13,7 @@
 
 struct Less_than_int
 {
-  bool operator()(const int& p1, const int& p2) const 
+  bool operator()(const int& p1, const int& p2) const
   {
     return (p1 < p2);
   }
@@ -25,7 +25,7 @@ struct point_d_less
 	{
 		if (lhs.dimension() < rhs.dimension()) return true;
 		if (rhs.dimension() < lhs.dimension()) return false;
-		
+
 		for(int i = 0; i < rhs.dimension(); ++i)
 		{
 			if (lhs.cartesian(i) < rhs.cartesian(i)) return true;
@@ -43,11 +43,11 @@ public:
    * You may change its structure, but make sure you that it remains consistent
    * with the run() operation in Planner.h
    */
-  Prm(int number_vertices, 
-      int k_nearest, 
-      const CollisionDetector& col, 
+  Prm(int number_vertices,
+      int k_nearest,
+      const CollisionDetector& col,
       const Sampler& sampler,
-      Point_d start, Point_d target); 
+      Point_d start, Point_d target);
 
 
 
@@ -58,11 +58,11 @@ public:
 
   double configuration_distance(const Point_d& lhs, const Point_d& rhs);
   void add_edges( const Point_d &p, int K, double EPS );
-  
+
   //  This operation is supposed to generate the roadmap (sample configurations
   //  and connect them.
   void generate_roadmap();
-  
+
 
   //  Returns a point path from start to target.
   //  If a path doesn't exist, returns empty vector.
