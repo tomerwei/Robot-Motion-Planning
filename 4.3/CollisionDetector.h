@@ -22,7 +22,7 @@ public:
 
 
   Polygon_2 translate_polygon_to(const Polygon_2& poly, const Point_2& new_ref_pt) const;
-  Polygon_2 CollisionDetector::flip(const Polygon_2& robot);
+  Polygon_2 flip(const Polygon_2& robot);
 
   bool do_moved_robots_interesct( const Point_2 &robot1, const Point_2 &robot2 ) const;
 

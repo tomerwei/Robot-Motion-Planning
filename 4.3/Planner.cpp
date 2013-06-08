@@ -56,7 +56,7 @@ namespace {
 
 Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vector<Conf>>* path, double* quality) 
 : m_scene(scene)
-,m_what_to_optimize (measure ? OPT_TYPE_DISTANCE : OPT_TYPE_COMBO)
+,m_what_to_optimize (measure ? OPT_TYPE_COMBO : OPT_TYPE_DISTANCE)
 ,m_alpha (alpha)
 ,m_seconds (time)
 {
@@ -115,7 +115,7 @@ void Planner::run()
 	int msec_passed = 0;
 	do{ // timer loop
 
-      Prm roadmap( 400, 8, m_collision,
+      Prm roadmap( 15, 15, m_collision,
                          m_sampler, curr_start_conf, curr_end_conf);
       roadmap.generate_roadmap();
 
@@ -125,12 +125,11 @@ void Planner::run()
 	  {
       
 		// retrieve path from PRM
-		//hgraph.push_back(roadmap.retrieve_path());
+		hgraph.push_back(roadmap.retrieve_path());
 
-		//const std::list<Point_d> &path(hgraph.get_path());
-		  const std::vector<Point_d>&path(roadmap.retrieve_path());
+		const std::list<Point_d> &path(hgraph.get_path());
 		m_path.resize(path.size());
-		std::vector<Point_d>::const_iterator it(path.begin()), it_end(path.end());
+		std::list<Point_d>::const_iterator it(path.begin()), it_end(path.end());
 		for(int i = 0; it != it_end; ++it, ++i)
 		{
 			m_path[i].push_back(Point_2(it->cartesian(0),it->cartesian(1)));
@@ -145,5 +144,5 @@ void Planner::run()
 	  boost::posix_time::time_duration msdiff =  ends - starts;
 	  msec_passed = msdiff.total_milliseconds();
 	} //end timer loop
-	while (false);//(msec_passed < m_seconds*1000);
+	while (msec_passed < m_seconds*1000);
 }

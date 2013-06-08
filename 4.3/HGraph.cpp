@@ -36,16 +36,19 @@ void HGraph::push_back(const vector<Point_d>& path)
 	{
 		for(vector<Point_d>::const_iterator p = path.begin(), p_end = path.end(); p != p_end; ++p)
 		{
-			double d = m_distance_metric(*it,*p);
-			if (d < max_distance)
-			{
-				//if collision not detected...
-				m_graph.add_edge(*it,*p,d);
+			if (*it != *p) {
+				double d = m_distance_metric(*it,*p);
+				if (d < max_distance)
+				{
+					//if collision not detected...
+					m_graph.add_edge(*it,*p,d);
+				}
 			}
 		}
 	}
 
-	m_vertices.insert(m_path.begin(),m_path.end());
+	m_vertices.insert(path.begin(),path.end());
+	m_graph.clear_paths_to_target();
 	m_graph.find_path(m_start,m_target,m_path);
 }
 
