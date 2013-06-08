@@ -11,9 +11,8 @@
 #include <boost/date_time/time.hpp>
 #include <cassert>
 
-using namespace std;
-using namespace boost::posix_time;
 
+using namespace std;
 
 namespace {
 	struct path_length_dmetric : public HGraph::distance_metric {
@@ -63,6 +62,8 @@ Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vect
 ,m_what_to_optimize (measure ? OPT_TYPE_COMBO : OPT_TYPE_DISTANCE)
 ,m_alpha (alpha)
 ,m_seconds (time)
+,m_path_out(path)
+,m_quality_out(quality)
 {
 	/*	this method extracts information regarding the scenario from the 
 		gui and initializes the fields 
@@ -81,11 +82,8 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
-	const double  EPS   =  0.1;
-
-
-
-    ptime starts = boost::posix_time::microsec_clock::local_time();
+	const double  EPS   =  0.5;
+    boost::posix_time::ptime starts = boost::posix_time::microsec_clock::local_time();
 
 	//loop start
 	assert(m_start_confs.size() == 2);
@@ -105,7 +103,7 @@ void Planner::run()
 	end.push_back(CGAL::to_double(m_target_confs[1].y()));
 	Point_d      curr_end_conf(4,end.begin(),end.end());
 
-	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles,  EPS );
+	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles,  EPS);
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
 	std::auto_ptr<HGraph::distance_metric> dm;
 	if (m_what_to_optimize == OPT_TYPE_DISTANCE)
@@ -116,7 +114,8 @@ void Planner::run()
 	{
 		dm.reset( new combo_dmetric(m_alpha) );
 	}
-	HGraph hgraph(curr_start_conf,curr_end_conf, *dm);
+	LocalPlanner lp(m_collision);
+	HGraph hgraph( curr_start_conf,curr_end_conf, *dm,lp );
 
     // An example
 	int msec_passed = 0;
@@ -146,9 +145,11 @@ void Planner::run()
 		//	run this method when you finish to produce the path
 		//	IMPORTANT: the result should be put in m_path
 		transform_path_for_gui();
+		m_path_out->assign(m_path.begin(), m_path.end());
+		*m_quality_out = hgraph.get_distance();
 	  }
-	  ptime ends = boost::posix_time::microsec_clock::local_time();
-	  time_duration msdiff =  ends - starts;
+	  boost::posix_time::ptime ends = boost::posix_time::microsec_clock::local_time();
+	  boost::posix_time::time_duration msdiff =  ends - starts;
 	  msec_passed = msdiff.total_milliseconds();
 	} //end timer loop
 	while (msec_passed < m_seconds*1000);

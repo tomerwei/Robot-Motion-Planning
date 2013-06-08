@@ -139,6 +139,14 @@ public:
     }
   }
 
+  void find_weighted_path(const Node& source, const Node& target, std::list<Node>& path, double &weight)  
+  {
+	  find_path(source,target,path);
+	  if (!path.empty()){
+		  weight = _distance[_node_id_map[target]];
+	  }
+  }
+
   /* this method updates calculates the distance of all nodes from the given
    * target vertex, as well the actual path
    */

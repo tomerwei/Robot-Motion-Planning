@@ -59,6 +59,7 @@ if ( CGAL_FOUND AND CGAL_Qt4_FOUND AND QT4_FOUND )
     Scene.cpp
     Prm.cpp
     Planner.cpp
+    HGraph.cpp
     CollisionDetector.cpp
     Sampler.cpp
     MRMPDrawingBox.cpp
