@@ -178,7 +178,7 @@ void MRMPDrawingBox::setSceneRoom(){
 void MRMPDrawingBox::execute()
 {
 	setSceneRoom();
-	vector<vector<Conf>> retPath;
+	vector<vector<Conf> > retPath;
 	double quality;
 	Planner planner(m_mpScene, 45, false, 0, &retPath, &quality);
 	planner.run();

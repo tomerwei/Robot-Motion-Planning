@@ -57,7 +57,13 @@ if ( CGAL_FOUND AND CGAL_Qt4_FOUND AND QT4_FOUND )
     GraphicsEllipse.cpp
     GraphicsPolygon.cpp
     Scene.cpp
+    Prm.cpp
     Planner.cpp
+    CollisionDetector.cpp
+    Sampler.cpp
+    MRMPDrawingBox.cpp
+    MRMPApplication.cpp
+    main.cpp
     ${APP_UI_FILES} ${DB_UI_FILES}
     ${DT_RESOURCE_FILES}
     ${MRMPApplication_MOC}
