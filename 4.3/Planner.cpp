@@ -77,6 +77,7 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
+	const double  EPS   =  0.1;
     boost::posix_time::ptime starts = boost::posix_time::microsec_clock::local_time();
 
 	//loop start
@@ -97,7 +98,7 @@ void Planner::run()
 	end.push_back(CGAL::to_double(m_target_confs[1].y()));
 	Point_d      curr_end_conf(4,end.begin(),end.end());
 
-	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
+	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles,  EPS);
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
 	std::auto_ptr<HGraph::distance_metric> dm;
 	if (m_what_to_optimize == OPT_TYPE_DISTANCE)

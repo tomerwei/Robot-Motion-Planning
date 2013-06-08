@@ -29,7 +29,7 @@ double Prm::configuration_distance(const Point_d& lhs, const Point_d& rhs)
 	return v.squared_length();
 }
 
-void Prm::add_edges( const Point_d &p, int K, double EPS )
+void Prm::add_edges( const Point_d &p, int K)
 {
 	vector<Point_d>	nearest_neighbors;
 
@@ -45,7 +45,7 @@ void Prm::add_edges( const Point_d &p, int K, double EPS )
 		//if(m_graph->is_in_graph(pIt->second) && m_graph->is_in_graph(qIt->second) && !m_graph->is_in_same_cc( pIt->second, qIt->second ) )
 		{
 
-			bool is_connect_success =  m_loc_planner.local_planner( p, *q, EPS );
+			bool is_connect_success =  m_loc_planner.local_planner( p, *q );
 
 			if( is_connect_success )
 			{
@@ -97,11 +97,10 @@ void Prm::generate_roadmap()
 	  m_kd_tree.insert( m_target );
 
 	  int     K      = m_k_nearest; // K nearest neighbours
-	  double  EPS   =  0.1;
 
 	  for( std::vector<Point_d>::iterator p = points.begin(); p != points.end() ; ++p )
 	  {
-		  add_edges( *p, K, EPS );
+		  add_edges( *p, K );
 	  }
 
 	  int startID  = num_of_samples + 1;
@@ -112,14 +111,14 @@ void Prm::generate_roadmap()
 	  vertexIDToPoint[ startID ] = m_start;
 
 	  m_graph->add_vertex( startID );
-	  add_edges( m_start, K, EPS );
+	  add_edges( m_start, K );
 
 	  //connect target to roadmap graph
 	  vertexID[m_target] = targetID;
 	  vertexIDToPoint[ targetID ] = m_target;
 
 	  m_graph->add_vertex( targetID );
-	  add_edges( m_target, K, EPS );
+	  add_edges( m_target, K );
 
 	  is_path = m_graph->is_in_same_cc( startID, targetID );
 

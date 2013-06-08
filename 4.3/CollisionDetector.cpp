@@ -3,14 +3,33 @@
 #include <CGAL/minkowski_sum_2.h>
 #include <CGAL/intersections.h>
 #include <CGAL/convex_hull_2.h>
+#include <CGAL/Small_side_angle_bisector_decomposition_2.h>
 
-CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs)
+CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs, double eps)
 : approx_robot1(robot1)
 , approx_robot2(robot2)
 , m_obs(obs)
 , m_translate_helper()
 , m_minus_r1()
+, m_epsilon(eps)
 {
+	int nOfEdges = 8;
+	double radius = eps/2;
+	double dAlpha = (360.0/nOfEdges)*CGAL_PI/180;
+	Polygon_2 expander;
+	for (int i = nOfEdges; i>0; i--) {
+		double alpha = (i + 0.5)*dAlpha;
+		double x = (radius/cos(dAlpha/2)) * cos(alpha) * 1.05;
+		double y = (radius/cos(dAlpha/2)) * sin(alpha) * 1.05;
+		expander.push_back(Point_2(x, y));
+	}
+
+	CGAL::Small_side_angle_bisector_decomposition_2<Kernel>  ssab_decomp;
+	Polygon_with_holes_2  pwh = minkowski_sum_2 (robot1, expander, ssab_decomp);
+	approx_robot1 = pwh.outer_boundary();
+	pwh = minkowski_sum_2 (robot2, expander, ssab_decomp);
+	approx_robot2 = pwh.outer_boundary();
+
 	for(int i = 0; i < approx_robot1.size(); ++i)
 	{
 		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
@@ -80,10 +99,15 @@ bool CollisionDetector::do_moved_robots_interesct(
 bool CollisionDetector::valid_conf( const Point_d &pos ) const
 {
 	//Point
-	bool   res   =   false;
+	
 	Point_2 robo1_p( pos.cartesian(0),pos.cartesian(1) );
 	Point_2 robo2_p( pos.cartesian(2),pos.cartesian(3) );
+	return valid_conf(robo1_p,robo2_p);
+}
 
+bool CollisionDetector::valid_conf( const Point_2 &robo1_p, const Point_2 &robo2_p ) const
+{
+	bool   res   =   false;
 	bool is_robo1_p_valid = one_robot_valid_conf(robo1_p, m_r1_poly_set);
 	bool is_robo2_p_valid = one_robot_valid_conf(robo2_p, m_r2_poly_set);
 
@@ -150,107 +174,47 @@ Polygon_2 LocalPlanner::approx_mink(const Segment_2& seg, const Polygon_2& poly)
 	return Polygon_2(ret.begin(), ret.end());
 }
 
-  bool LocalPlanner::local_planner(Point_d start, Point_d target, double eps )
-  {
-	  
-	bool res = true;
+  bool LocalPlanner::local_planner(Point_d start, Point_d target )
+  {  
+	  double step_size = m_cd.m_epsilon;
 
-	Point_2 robo1_start( start.cartesian(0),start.cartesian(1) );
-	Point_2 robo2_start( start.cartesian(2),start.cartesian(3) );
+	  double last_clearance = 0;
 
-	Point_2 robo1_target( target.cartesian(0),target.cartesian(1) );
-	Point_2 robo2_target( target.cartesian(2),target.cartesian(3) );
+	  //check which robot has max distnace from s to t
+	  Point_2 r1_s(start.cartesian(0), start.cartesian(1)),
+		  r2_s(start.cartesian(2),start.cartesian(3)),
+		  r1_t(target.cartesian(0),target.cartesian(1)),
+		  r2_t(target.cartesian(2),target.cartesian(2));
 
-	if( !local_planner_one_robot(robo1_start,robo1_target,m_cd.m_r1_poly_set,eps) ||
-		!local_planner_one_robot(robo2_start,robo2_target,m_cd.m_r2_poly_set,eps) )
-	{
-		return false;
-	}
+	  double max_dist = std::max(
+		  CGAL::to_double(CGAL::squared_distance(r1_s,r1_t)),
+		  CGAL::to_double(CGAL::squared_distance(r2_s,r2_t))
+		);
 
-	Kernel::Segment_2 r1_p( robo1_start,robo1_target );
-	Polygon_2 r1_path = approx_mink( r1_p,m_cd.approx_robot1 );
-    Polygon_set_2 ps_r1_p;
-    if ( !r1_path.is_counterclockwise_oriented() )
-    {
-    	r1_path.reverse_orientation();
-    }
-    ps_r1_p.insert( r1_path );
+  	  // calculate how many steps are required
+	  int step_num = floor((max_dist - step_size) / step_size);
 
+  	  // generate a configuration for every step
+	  Vector_2 vec1 = Vector_2(r1_s,r1_t)/step_num;
+	  Vector_2 vec2 = Vector_2(r2_s,r2_t)/step_num;
+	  Point_2 s1 = r1_s,
+		  s2 = r2_s;
+	  for (int j = 1; j <= step_num; ++j) 
+	  {
+		  Point_2 t1 = s1 + vec1;
+		  Point_2 t2 = s2 + vec2;
+		  
+		  // If an intermidiate configuration is invalid, return false
+		  if (!m_cd.valid_conf(t1,t2))
+		  {
+			return false;
+			}
 
-	Kernel::Segment_2 r2_p( robo2_start,robo2_target );
-	Polygon_2 r2_path = approx_mink( r2_p,m_cd.approx_robot2 );
-	Polygon_set_2 ps_r2_p;
-	if( !r2_path.is_counterclockwise_oriented() )
-	{
-		r2_path.reverse_orientation();
-	}
-	ps_r2_p.insert( r2_path );
-
-	return ps_r1_p.do_intersect( ps_r2_p );
-	
-	//return !CGAL::do_intersect(r1_path,r2_path);
-
-	/*double robo1_xStart = start.cartesian(0);
-	double robo1_yStart = start.cartesian(1);
-	double robo1_xEnd   = target.cartesian(0);
-	double robo1_yEnd   = target.cartesian(1);
-
-	double distance1 = sqrt(pow( robo1_xStart - robo1_xEnd, 2) +
-						pow( robo1_yStart - robo1_yEnd,2));
+		  s1 = t1;
+		  s2 = t2;
+	  }
 
 
-	double robo2_xStart = start.cartesian(2);
-	double robo2_yStart = start.cartesian(3);
-	double robo2_xEnd   = target.cartesian(2);
-	double robo2_yEnd   = target.cartesian(3);
-
-	double distance2 = sqrt(pow( robo2_xStart - robo2_xEnd, 2) +
-						pow( robo2_yStart - robo2_yEnd,2));
-
-	double step_size = eps;
-
-	int robo1_step_num = floor((distance1 - step_size) / step_size);
-	int robo2_step_num = floor((distance1 - step_size) / step_size);
-
-
-    for (int i = 1; i <= robo1_step_num; ++i)
-    {
-
-      double robo1_vx = robo1_xEnd - robo1_xStart;
-      double robo1_vy = robo1_yEnd - robo1_yStart;
-
-      // generate a configuration for every step
-      double robo1_offset =  (i * step_size) / (distance1 - step_size);
-      double robo1_currx = robo1_xStart + robo1_vx * robo1_offset;
-      double robo1_curry = robo1_yStart + robo1_vy * robo1_offset;
-
-      //Point_d currentPos(currx, curry);
-      for( int j = 1; j <= robo2_step_num; ++j)
-      {
-          double robo2_vx = robo2_xEnd - robo2_xStart;
-          double robo2_vy = robo2_yEnd - robo2_yStart;
-
-          // generate a configuration for every step
-          double robo2_offset =  (j * step_size) / (distance2 - step_size);
-          double robo2_currx = robo2_xStart + robo2_vx * robo2_offset;
-          double robo2_curry = robo2_yStart + robo2_vy * robo2_offset;
-
-		  std::vector<double> curr;
-		  curr.push_back(robo1_currx);
-		  curr.push_back(robo1_curry);
-		  curr.push_back(robo2_currx);
-		  curr.push_back(robo2_curry);
-		  Point_d currentPos(4, curr.begin(),curr.end()  );
-
-          if (!valid_conf( currentPos )) return false;
-      }
-
-      // If an intermidiate configuration is invalid, return false
-
-    }
-	return true;
-	*/
-	 /*
-    
-    */
+    // GREAT SUCCESS!
+    return true;
   }

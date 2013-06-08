@@ -12,7 +12,7 @@ public:
    * radius  - radius of robot
    * Room  - describes the boundary of the scenario
    */
-  CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs);
+  CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs, double epsilon);
   
   ~CollisionDetector() {};
 
@@ -34,6 +34,7 @@ public:
    * free samples)
    */
   bool valid_conf( const Point_d &pos ) const;
+  bool valid_conf( const Point_2 &pos1, const Point_2 &pos2 ) const;
 
   /* Validate the connection between two configurations by 
    * sampling along a line.
@@ -48,12 +49,13 @@ public:
   Polygon_2     approx_robot2;
   mutable std::vector<Point_2> m_translate_helper; //mutable so that the methods for do_valid can remain const
   Polygon_2 m_minus_r1;
+  double m_epsilon;
 };
 
 class LocalPlanner {
 public: 
   explicit LocalPlanner(const CollisionDetector& cd);
-  bool local_planner(Point_d start, Point_d target, double eps );
+  bool local_planner(Point_d start, Point_d target);
 private:
   bool local_planner_one_robot(const Point_2& start, const Point_2& target, const Polygon_set_2& obstacles, double eps);
   Polygon_2 approx_mink(const Segment_2& seg, const Polygon_2& poly);

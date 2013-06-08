@@ -41,7 +41,7 @@ public:
   }
 
   double configuration_distance(const Point_d& lhs, const Point_d& rhs);
-  void add_edges( const Point_d &p, int K, double EPS );
+  void add_edges( const Point_d &p, int K );
   
   //  This operation is supposed to generate the roadmap (sample configurations
   //  and connect them.
