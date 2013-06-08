@@ -10,8 +10,8 @@ using namespace std;
 
 Planner::Planner(Scene* scene) : m_scene(scene)
 {
-	/*	this method extracts information regarding the scenario from the 
-		gui and initializes the fields 
+	/*	this method extracts information regarding the scenario from the
+		gui and initializes the fields
 			m_robot_polygons
 			m_obstacles
 			m_start_confs, m_target_confs
@@ -68,10 +68,16 @@ void Planner::run()
 		to target, and back to start */
 	//m_path.push_back();
 	m_path.resize(path.size());
+
+	cout << "Path size: " <<  path.size() << "\n";
+
 	for(int i(0), sz(path.size()); i < sz; ++i)
 	{
 		m_path[i].push_back(Point_2(path[i].cartesian(0),path[i].cartesian(1)));
 		m_path[i].push_back(Point_2(path[i].cartesian(2),path[i].cartesian(3)));
+
+		cout << "r1: " <<  Point_2(path[i].cartesian(0),path[i].cartesian(1)) << "\n";
+		cout << "r2: " <<  Point_2(path[i].cartesian(2),path[i].cartesian(3)) << "\n";
 	}
 
 	//	run this method when you finish to produce the path

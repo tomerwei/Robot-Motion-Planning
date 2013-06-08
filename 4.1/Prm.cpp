@@ -97,7 +97,7 @@ void Prm::generate_roadmap()
 	  m_kd_tree.insert( m_target );
 
 	  int     K      = m_k_nearest; // K nearest neighbours
-	  double  EPS   =  0.1;
+	  double  EPS   =  4.5;        //TODO change
 
 	  for( std::vector<Point_d>::iterator p = points.begin(); p != points.end() ; ++p )
 	  {

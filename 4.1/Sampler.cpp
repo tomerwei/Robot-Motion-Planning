@@ -5,7 +5,7 @@ Sampler::Sampler(
 	Polygon_2 robot1,
 	Polygon_2 robot2,
 	Room room, 
-	const CollisionDetector &col, 
+	const CollisionDetector &col,
 	double seed/* = -1*/)
 : m_robot1( robot1 )
 , m_robot2( robot2 )

@@ -8,9 +8,9 @@
 #include "Scene.h"
 #include "Graph.h"
 #include "Kd_tree_d.h"
+#include "CollisionDetector.h"
 #include <CGAL/Random.h>
 #include <boost/shared_ptr.hpp>
-#include "CollisionDetector.h"
 #include "Sampler.h"
 #include "Prm.h"
 
@@ -78,6 +78,8 @@ private:
 	void		transform_path_for_gui()
 	{
 		vector<vector<vector<QConf> > > result_vectors(m_path.size());
+
+		cout << "Path size: " <<  m_path.size() << "\n";
 
 		for (int i = 0; i < m_path.size(); i++)
 		{
