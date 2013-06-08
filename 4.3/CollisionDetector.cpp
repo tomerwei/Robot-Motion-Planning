@@ -6,17 +6,6 @@
 #include <CGAL/Small_side_angle_bisector_decomposition_2.h>
 
 
-Polygon_2 CollisionDetector::flip(const Polygon_2& robot)
-{
-	m_translate_helper.resize(0);
-	for(int i = 0; i < approx_robot1.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
-		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	return Polygon_2(m_translate_helper.begin(), m_translate_helper.end());
-}
-
 CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs,double eps)
 : approx_robot1(robot1)
 , approx_robot2(robot2)
@@ -80,6 +69,19 @@ CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacl
 	Polygon_with_holes_2  r2_r1 = minkowski_sum_2 (approx_robot2, m_minus_r1_en, ssab_decomp);
 	m_r2_min_r1.join(r2_r1);
 }
+
+
+Polygon_2 CollisionDetector::flip(const Polygon_2& robot)
+{
+	m_translate_helper.resize(0);
+	for(int i = 0; i < approx_robot1.size(); ++i)
+	{
+		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
+		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
+	}
+	return Polygon_2(m_translate_helper.begin(), m_translate_helper.end());
+}
+
 
 Polygon_2 CollisionDetector::translate_polygon_to(const Polygon_2& poly, const Point_2& new_ref_pt) const
 {

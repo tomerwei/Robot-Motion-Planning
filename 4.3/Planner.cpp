@@ -5,11 +5,14 @@
 #include "Kd_tree_d.h"
 #include <boost/make_shared.hpp>
 #include <CGAL/Boolean_set_operations_2.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/time.hpp>
 #include <cassert>
 #include <math.h>
+
 
 using namespace std;
 
@@ -145,7 +148,7 @@ void Planner::run()
 		dm.reset( new combo_dmetric(m_alpha) );
 	}
 	LocalPlanner lp(m_collision);
-	HGraph hgraph(curr_start_conf,curr_end_conf, *dm,lp);
+	HGraph hgraph( curr_start_conf,curr_end_conf, *dm,lp );
 
     // An example
 	int msec_passed = 0;
