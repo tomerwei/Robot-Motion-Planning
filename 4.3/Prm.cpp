@@ -1,4 +1,5 @@
 #include "Prm.h"
+#include <cstdio>
 
 Prm::Prm(int number_vertices, 
       int k_nearest, 
@@ -33,9 +34,10 @@ void Prm::add_edges( const Point_d &p, int K)
 {
 	vector<Point_d>	nearest_neighbors;
 
-
+	std::cout << "getting knn" << std::endl;
 	m_kd_tree.k_nearest_neighbors( p,
 	  		K, std::back_inserter( nearest_neighbors ) );
+	std::cout << "got knn" << std::endl;
 
 	for( std::vector<Point_d>::iterator q = nearest_neighbors.begin() ;
 		q != nearest_neighbors.end() ; ++q )
@@ -43,12 +45,13 @@ void Prm::add_edges( const Point_d &p, int K)
 		//point_to_node_map_t::const_iterator  pIt = vertexID.find( p );
         //point_to_node_map_t::const_iterator  qIt = vertexID.find( *q );
 		//if(m_graph->is_in_graph(pIt->second) && m_graph->is_in_graph(qIt->second) && !m_graph->is_in_same_cc( pIt->second, qIt->second ) )
-		{
+		std::cout << "trying neightbor #" << std::distance(nearest_neighbors.begin(), q) << std::endl;		
 
 			bool is_connect_success =  m_loc_planner.local_planner( p, *q );
 
 			if( is_connect_success )
 			{
+				std::cout << "connected" << std::endl;
 				point_to_node_map_t::const_iterator  pIt = vertexID.find( p );
 				point_to_node_map_t::const_iterator  qIt = vertexID.find( *q );
 
@@ -60,13 +63,20 @@ void Prm::add_edges( const Point_d &p, int K)
 					double dist = configuration_distance( p, *q );//distance between q and p
 					m_graph->add_edge( pID, qID, dist );
 				}
+				std::cout << "done connecting" << std::endl;
 			}
-		}
+			else
+			{
+				std::cout << "did not connect" << std::endl;
+			}
+		
 	}
 }
 
 void Prm::generate_roadmap()
 {
+	std::cout << "Starting roadmap generation" << std::endl;
+
 	  m_graph   = new Graph<int, Less_than_int>(0, true); // construction of an empty graph
 	  //m_kd_tree = new Kd_tree_d<Kernel_d>();
 
@@ -78,16 +88,17 @@ void Prm::generate_roadmap()
 	  {
 		  Point_d p = m_sampler.generate_sample();
 
-		  if( m_col.valid_conf( p) )
-		  {
-			  vertexID[p] = i;
-			  vertexIDToPoint[i] = p;
-			  m_graph->add_vertex( i );
+		  //already valid
+			vertexID[p] = i;
+			vertexIDToPoint[i] = p;
+			m_graph->add_vertex( i );
 
-			  points.push_back( p );
-			  i++;
-		  }
+			points.push_back( p );
+			i++;
+		  
 	  }
+
+	  std::cout << num_of_samples << " points generated" << std::endl;
 
 	  //find nearest neighbours
 
@@ -100,6 +111,7 @@ void Prm::generate_roadmap()
 
 	  for( std::vector<Point_d>::iterator p = points.begin(); p != points.end() ; ++p )
 	  {
+		  std::cout << "adding edges for point #" << std::distance(points.begin(),p) << std::endl;
 		  add_edges( *p, K );
 	  }
 
@@ -134,4 +146,6 @@ void Prm::generate_roadmap()
 			  m_path.push_back( p );
 		  }
 	  }
+
+	  std::cout << "Roadmap gen done" << std::endl;
   }
