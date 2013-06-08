@@ -68,6 +68,13 @@ CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacl
 	}
 	
 	Polygon_with_holes_2  r1_r2 = minkowski_sum_2 (approx_robot1, m_minus_r2_en, ssab_decomp);
+	Polygon_2 for_print = r1_r2.outer_boundary();
+	for(Polygon_2::Vertex_const_iterator it = for_print.vertices_begin(); it != for_print.vertices_end(); ++it)
+	{
+		std::cout << "(" << it->x() << "," << it->y() << "),";
+	}
+	std::cout << std::endl;
+
 	m_r1_min_r2.join(r1_r2);
 	
 	Polygon_with_holes_2  r2_r1 = minkowski_sum_2 (approx_robot2, m_minus_r1_en, ssab_decomp);
@@ -103,10 +110,7 @@ bool CollisionDetector::do_moved_robots_interesct(
 {
 	Point_2 pRobotTag(robot1.x()-robot2.x(), robot1.y()-robot2.y());
 
-	if (m_r1_min_r2.oriented_side(pRobotTag) != CGAL::ON_NEGATIVE_SIDE)
-		return false;
-
-	return true;
+	return (m_r1_min_r2.oriented_side(pRobotTag) == CGAL::ON_BOUNDED_SIDE);
 }
 
 bool CollisionDetector::valid_conf( const Point_d &pos ) const
@@ -231,7 +235,7 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 	return true;
 }
 
-  bool LocalPlanner::local_planner(Point_d start, Point_d target )
+  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target )
   {
 	  double eps = m_cd.m_epsilon;
 	  
