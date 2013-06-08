@@ -1,5 +1,6 @@
 #include "Planner.h"
 #include "HGraph.h"
+#include "Clearance_detector_ie.h"
 #include <CGAL/point_generators_2.h>
 #include "Kd_tree_d.h"
 #include <boost/make_shared.hpp>
@@ -8,6 +9,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/time.hpp>
 #include <cassert>
+#include <math.h>
 
 using namespace std;
 
@@ -27,8 +29,37 @@ namespace {
 	};
 
 	struct combo_dmetric : public HGraph::distance_metric {
-		combo_dmetric(double alpha)
-			:m_alpha(alpha) {}
+		combo_dmetric(double alpha, double epsilon, const Clearance_detector_ie& cd_r1)
+			:m_alpha(alpha), m_epsilon {}
+
+		double clearance_along_path(const Point_2& lhs, const Point_2& rhs) const
+		{
+			Point_2_ie pt(lhs.x(),lhs.y());
+			double ret = std::min(INFINITY,m_cd_r1.clearance(pt));
+			double distance = CGAL::to_double(CGAL::squared_distance(lhs,rhs));
+			Vector_2_ie vec = Vector_2_ie(lhs,rhs) * m_epsilon / distance;
+			int num_steps = floor((distance - m_epsilon) / m_epsilon);
+			for(int i = 0; i < num_steps; ++i)
+			{
+				pt = pt + vec;
+				ret = std::min(ret,m_cd_r1.clearance(pt));
+			}
+			
+			ret = std::min(ret,m_cd_r1.clearance(Point_2_ie(rhs.x(),rhs.y())));
+
+			return ret;
+		}
+
+		double clearance_along_path(const Point_d& lhs, const Point_d& rhs) const
+		{
+			const Point_2 r1_lhs(lhs.cartesian(0),cartesian(1)),
+				r2_lhs(lhs.cartesian(2),lhs.cartesian(3)),
+				r1_rhs(rhs.cartesian(0),rhs.cartesian(1)),
+				r2_rhs(rhs.cartesian(2),rhs.cartesian(3));
+			
+			return clearance_along_path(r1_lhs,r1_rhs) + clearance_along_path(r2_lhs,r2_rhs);
+			
+		}
 
 		virtual double do_measure( const Point_d& lhs, const Point_d& rhs) const
 		{
@@ -43,13 +74,15 @@ namespace {
 			double r1_l = sqrt(r1_sq),
 				r2_l = sqrt(r2_sq);
 			
-			double r1_c, r2_c;
+			double r1_c = clearance_along_path(lhs,rhs,r1),
+				r2_c = clearance_along_path(lhs,rhs,r1);
 
 			return (r1_l / pow(r1_c,m_alpha)) + (r2_l / pow(r2_c,m_alpha));
 		}
 
 	private:
-		double m_alpha;
+		const double m_alpha, m_epsilon;
+		const Clearance_detector_ie& m_cd_r1;
 	};
 }
 
