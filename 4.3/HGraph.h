@@ -20,6 +20,7 @@ public:
 
 	void push_back(const vector<Point_d>& path);
 	const list<Point_d>& get_path() const;
+	const double get_distance() const;
 
 private:
 	typedef std::set<Point_d, point_d_less> point_set_t;
@@ -28,6 +29,7 @@ private:
 	const distance_metric &m_distance_metric;
 	Point_d m_start,m_target;
 	std::list<Point_d> m_path;
+	double m_distance;
 };
 
 #endif //__HGRAPH_INCLUDED__

@@ -59,6 +59,8 @@ Planner::Planner(Scene* scene, int time, bool measure, double alpha, vector<vect
 ,m_what_to_optimize (measure ? OPT_TYPE_COMBO : OPT_TYPE_DISTANCE)
 ,m_alpha (alpha)
 ,m_seconds (time)
+,m_path_out(path)
+,m_quality_out(quality)
 {
 	/*	this method extracts information regarding the scenario from the 
 		gui and initializes the fields 
@@ -77,7 +79,7 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
-	const double  EPS   =  0.1;
+	const double  EPS   =  0.5;
     boost::posix_time::ptime starts = boost::posix_time::microsec_clock::local_time();
 
 	//loop start
@@ -139,6 +141,8 @@ void Planner::run()
 		//	run this method when you finish to produce the path
 		//	IMPORTANT: the result should be put in m_path
 		transform_path_for_gui();
+		m_path_out->assign(m_path.begin(), m_path.end());
+		*m_quality_out = hgraph.get_distance();
 	  }
 	  boost::posix_time::ptime ends = boost::posix_time::microsec_clock::local_time();
 	  boost::posix_time::time_duration msdiff =  ends - starts;

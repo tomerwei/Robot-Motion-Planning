@@ -192,6 +192,8 @@ private:
 	opt_type					m_what_to_optimize;
 	double						m_alpha;
 	int							m_seconds;
+	vector<vector<Conf> >		*m_path_out;
+	double						*m_quality_out;
 };
 
 
