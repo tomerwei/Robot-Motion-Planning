@@ -1,13 +1,15 @@
 #include "HGraph.h"
 #include <cassert>
 
-HGraph::HGraph(const Point_d& start_pos, const Point_d& end_pos, const distance_metric& dm)
+HGraph::HGraph(const Point_d& start_pos, const Point_d& end_pos, const distance_metric& dm, const LocalPlanner& lp)
 :m_graph()
 ,m_vertices()
 ,m_distance_metric(dm)
 ,m_start(start_pos)
 ,m_target(end_pos)
+,m_lp(lp)
 ,m_path()
+,m_distance()
 {
 	m_graph.add_vertex(start_pos);
 	m_graph.add_vertex(end_pos);
@@ -42,8 +44,8 @@ void HGraph::push_back(const vector<Point_d>& path)
 				double d = m_distance_metric(*it,*p);
 				if (d < max_distance)
 				{
-					//if collision not detected...
-					m_graph.add_edge(*it,*p,d);
+					if (m_lp.local_planner(*it,*p)) //no collision on the way
+						m_graph.add_edge(*it,*p,d);
 				}
 			}
 		}
@@ -58,4 +60,9 @@ void HGraph::push_back(const vector<Point_d>& path)
 const list<Point_d>& HGraph::get_path() const
 {
 	return m_path;
+}
+
+double HGraph::get_distance() const
+{
+	return m_distance;
 }

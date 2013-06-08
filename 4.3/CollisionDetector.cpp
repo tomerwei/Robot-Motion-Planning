@@ -140,7 +140,7 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 		                                         const Point_2& target_r1,
 		                                         const Point_2& start_r2,
 		                                         const Point_2& target_r2,
-		                                         double eps )
+		                                         double eps ) const
 {
 	//robot 1 calc
 	double x1_r1 = CGAL::to_double(start_r1.x());
@@ -235,7 +235,7 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 	return true;
 }
 
-  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target )
+  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target ) const
   {
 	  double eps = m_cd.m_epsilon;
 	  

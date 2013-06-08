@@ -111,7 +111,8 @@ void Planner::run()
 	{
 		dm.reset( new combo_dmetric(m_alpha) );
 	}
-	HGraph hgraph(curr_start_conf,curr_end_conf, *dm);
+	LocalPlanner lp(m_collision);
+	HGraph hgraph(curr_start_conf,curr_end_conf, *dm,lp);
 
     // An example
 	int msec_passed = 0;
