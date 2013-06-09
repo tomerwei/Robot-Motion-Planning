@@ -45,7 +45,6 @@ void Prm::add_edges( const Point_d &p, int K)
 		//point_to_node_map_t::const_iterator  pIt = vertexID.find( p );
         //point_to_node_map_t::const_iterator  qIt = vertexID.find( *q );
 		//if(m_graph->is_in_graph(pIt->second) && m_graph->is_in_graph(qIt->second) && !m_graph->is_in_same_cc( pIt->second, qIt->second ) )
-		std::cout << "trying neightbor #" << std::distance(nearest_neighbors.begin(), q) << std::endl;		
 
 			bool is_connect_success =  m_loc_planner.local_planner( p, *q );
 
@@ -111,7 +110,6 @@ void Prm::generate_roadmap()
 
 	  for( std::vector<Point_d>::iterator p = points.begin(); p != points.end() ; ++p )
 	  {
-		  std::cout << "adding edges for point #" << std::distance(points.begin(),p) << std::endl;
 		  add_edges( *p, K );
 	  }
 

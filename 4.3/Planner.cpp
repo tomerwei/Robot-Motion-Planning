@@ -151,7 +151,7 @@ void Planner::run()
 	int msec_passed = 0;
 	do{ // timer loop
 
-      Prm roadmap( 15, 15, m_collision,
+      Prm roadmap( 250, 12, m_collision,
                          m_sampler, curr_start_conf, curr_end_conf);
       roadmap.generate_roadmap();
 
