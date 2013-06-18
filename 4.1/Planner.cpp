@@ -27,6 +27,7 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
+	const double EPS = 0.1;
 	//loop start
 	assert(m_start_confs.size() == 2);
 	Polygon_2 robot_poly1(m_robot_polygons[0]); //via loop on all m_robot_polygons
@@ -45,7 +46,7 @@ void Planner::run()
 	end.push_back(CGAL::to_double(m_target_confs[1].y()));
 	Point_d      curr_end_conf(4,end.begin(),end.end());
 
-	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles );
+	CollisionDetector m_collision( robot_poly1, robot_poly2, &m_obstacles, EPS );
 	Sampler           m_sampler( robot_poly1, robot_poly2, m_room, m_collision );
 
     // An example

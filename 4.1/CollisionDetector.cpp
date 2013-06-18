@@ -3,45 +3,85 @@
 #include <CGAL/minkowski_sum_2.h>
 #include <CGAL/intersections.h>
 #include <CGAL/convex_hull_2.h>
+#include <CGAL/Small_side_angle_bisector_decomposition_2.h>
 
-CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs)
+
+CollisionDetector::CollisionDetector(Polygon_2 robot1, Polygon_2 robot2, Obstacles* obs,double eps)
 : approx_robot1(robot1)
 , approx_robot2(robot2)
 , m_obs(obs)
 , m_translate_helper()
-, m_minus_r1()
+, m_minus_r1(flip(robot1))
+, m_minus_r2(flip(robot2))
+, m_epsilon(eps)
 {
-	m_translate_helper.resize(0);
-	for(int i = 0; i < approx_robot1.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - approx_robot1.vertex(i);
-		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
+	Polygon_2 enlarger;
+	int nOfEdges = 8;
+	double radius = eps/2;
+	double dAlpha = (360.0/nOfEdges)*CGAL_PI/180;
+	for (int i = nOfEdges; i>0; i--) {
+		double alpha = (i + 0.5)*dAlpha;
+		double x = (radius/cos(dAlpha/2)) * cos(alpha) * 1.05;
+		double y = (radius/cos(dAlpha/2)) * sin(alpha) * 1.05;
+		enlarger.push_back(Point_2(x, y));
 	}
-	m_minus_r1 = Polygon_2(m_translate_helper.begin(), m_translate_helper.end());
-	m_translate_helper.resize(0);
-	for(int i = 0; i < approx_robot2.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - approx_robot2.vertex(i);
-		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	Polygon_2 minus_r2(m_translate_helper.begin(), m_translate_helper.end());
+	
+	// Compute the Minkowski sum using the decomposition approach.
+	CGAL::Small_side_angle_bisector_decomposition_2<Kernel>  ssab_decomp;
 
-	// Construction of the polygon set, used for collision detection
-	if (!m_obs->empty()) 
-	{
-		for (Obstacles::iterator iter =
-				m_obs->begin(); iter != m_obs->end(); iter++)
-		{
-			// For every obstacle calculate its Minkowski sum with the "robot"
-			Polygon_with_holes_2  poly_wh1 = minkowski_sum_2(*iter, m_minus_r1);
-			Polygon_with_holes_2  poly_wh2 = minkowski_sum_2(*iter, minus_r2);
+	Polygon_with_holes_2  pwh1 = minkowski_sum_2 (robot1, enlarger, ssab_decomp);
+	Polygon_with_holes_2  pwh2 = minkowski_sum_2 (robot2, enlarger, ssab_decomp);
+		
+	approx_robot1 = pwh1.outer_boundary();
+	approx_robot2 = pwh2.outer_boundary();
 
+	Polygon_with_holes_2  pwhF1 = minkowski_sum_2 (m_minus_r1, enlarger, ssab_decomp);
+	Polygon_with_holes_2  pwhF2 = minkowski_sum_2 (m_minus_r2, enlarger, ssab_decomp);
+
+	m_minus_r1_en = pwhF1.outer_boundary();
+	m_minus_r2_en = pwhF2.outer_boundary();
+
+
+	Polygon_set_2 ps;
+	if (!m_obs->empty())
+	{
+		for (Obstacles::iterator Oiter = m_obs->begin(); Oiter != m_obs->end(); Oiter++)
+		{		
+			  // For every obstacle calculate its Minkowski sum with a "robot"
+			Polygon_with_holes_2  poly_wh1 = minkowski_sum_2 (*Oiter, m_minus_r1_en, ssab_decomp);		
+			Polygon_with_holes_2  poly_wh2 = minkowski_sum_2 (*Oiter, m_minus_r2_en, ssab_decomp);		
 			// Add the result to the polygon set
 			m_r1_poly_set.join(poly_wh1);
 			m_r2_poly_set.join(poly_wh2);
 		}
 	}
+	
+	Polygon_with_holes_2  r1_r2 = minkowski_sum_2 (approx_robot1, m_minus_r2_en, ssab_decomp);
+	Polygon_2 for_print = r1_r2.outer_boundary();
+	for(Polygon_2::Vertex_const_iterator it = for_print.vertices_begin(); it != for_print.vertices_end(); ++it)
+	{
+		std::cout << "(" << it->x() << "," << it->y() << "),";
+	}
+	std::cout << std::endl;
+
+	m_r1_min_r2.join(r1_r2);
+	
+	Polygon_with_holes_2  r2_r1 = minkowski_sum_2 (approx_robot2, m_minus_r1_en, ssab_decomp);
+	m_r2_min_r1.join(r2_r1);
 }
+
+
+Polygon_2 CollisionDetector::flip(const Polygon_2& robot)
+{
+	m_translate_helper.resize(0);
+	for(int i = 0; i < robot.size(); ++i)
+	{
+		Vector_2 minus_p = CGAL::ORIGIN - robot.vertex(i);
+		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
+	}
+	return Polygon_2(m_translate_helper.begin(), m_translate_helper.end());
+}
+
 
 Polygon_2 CollisionDetector::translate_polygon_to(const Polygon_2& poly, const Point_2& new_ref_pt) const
 {
@@ -66,73 +106,31 @@ Polygon_2 CollisionDetector::translate_polygon_to(const Polygon_2& poly, const P
 }
 
 bool CollisionDetector::do_moved_robots_interesct(
-	const Polygon_2 &robot1, 
-	const Polygon_2 &robot2
+	const Point_2 &robot1, 
+	const Point_2 &robot2
 ) const
 {
-	/*
-	Polygon_2      r2    =  translate_polygon_to( robot2,r2_new );
-	Polygon_set_2  ps_r2;
-	if ( !r2.is_counterclockwise_oriented() )
-	{
-		r2.reverse_orientation();
-	}
-	ps_r2.insert( r2 );
+	Point_2 pRobotTag(robot1.x()-robot2.x(), robot1.y()-robot2.y());
 
-	Polygon_with_holes_2  poly_wh1 = minkowski_sum_2( r2, m_minus_r1 );
-	Polygon_set_2 ps;
-	ps.insert( poly_wh1 );
-
-	return ps.oriented_side(r1_new) == CGAL::ON_BOUNDED_SIDE;
-	*/
-
-	CGAL::Polygon_set_2<Kernel> set;
-
-    set.join( robot1 );
-	set.intersection( robot2 );
-
-	return !set.is_empty();
+	return (m_r1_min_r2.oriented_side(pRobotTag) == CGAL::ON_BOUNDED_SIDE);
 }
 
 bool CollisionDetector::valid_conf( const Point_d &pos ) const
 {
-	//Point
-	bool   res   =   false;
 	Point_2 robo1_p( pos.cartesian(0),pos.cartesian(1) );
 	Point_2 robo2_p( pos.cartesian(2),pos.cartesian(3) );
+	return valid_conf(robo1_p,robo2_p);
+}
 
-	Polygon_2  trans_r1     =  translate_polygon_to( approx_robot1,robo1_p );
-	Polygon_2  trans_r2     =  translate_polygon_to( approx_robot2,robo2_p );
+bool CollisionDetector::valid_conf( const Point_2& robo1_p, const Point_2& robo2_p) const
+{
+	if (!one_robot_valid_conf(robo1_p,m_r1_poly_set) || !one_robot_valid_conf(robo2_p,m_r2_poly_set))
+		return false;
 
-	m_translate_helper.resize(0);
-	for(int i = 0; i < trans_r1.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - trans_r1.vertex(i);
-		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	Polygon_2 minus_trans_r2( m_translate_helper.begin(), m_translate_helper.end() );
-	Polygon_with_holes_2  m_robo_r1 = minkowski_sum_2( trans_r1 , minus_trans_r2);
+	if (do_moved_robots_interesct(robo1_p,robo2_p))
+		return false;
 
-	m_translate_helper.resize(0);
-	for(int i = 0; i < trans_r2.size(); ++i)
-	{
-		Vector_2 minus_p = CGAL::ORIGIN - trans_r2.vertex(i);
-		m_translate_helper.push_back(Point_2(minus_p.x(),minus_p.y()));
-	}
-	Polygon_2 minus_trans_r1( m_translate_helper.begin(), m_translate_helper.end() );
-	Polygon_with_holes_2  m_robo_r2 = minkowski_sum_2( trans_r2 , minus_trans_r1);
-
-	bool      is_robo1_p_valid  =  one_robot_valid_conf(robo1_p, m_r1_poly_set, m_robo_r2 );
-	bool      is_robo2_p_valid  =  one_robot_valid_conf(robo2_p, m_r2_poly_set, m_robo_r1 );
-
-	if ( is_robo1_p_valid && is_robo2_p_valid )
-	{
-		//check that robos do not overlap, translate robos to new location
-
-		res = !do_moved_robots_interesct( trans_r1, trans_r2 );
-	}
-
-	return res;
+	return true;
 }
 
 LocalPlanner::LocalPlanner(const CollisionDetector& cd)
@@ -144,7 +142,7 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 		                                         const Point_2& target_r1,
 		                                         const Point_2& start_r2,
 		                                         const Point_2& target_r2,
-		                                         double eps )
+		                                         double eps ) const
 {
 	//robot 1 calc
 	double x1_r1 = CGAL::to_double(start_r1.x());
@@ -193,14 +191,7 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 		double currx_r2 = x1_r2 + vx_r2 * offset_r2;
 		double curry_r2 = y1_r2 + vy_r2 * offset_r2;
 
-		coords.resize(0);
-	    coords.push_back(currx_r1);
-	    coords.push_back(curry_r1);
-	    coords.push_back(currx_r2);
-	    coords.push_back(curry_r2);
-		Point_d p( 4,coords.begin(),coords.end() );
-
-		if( !m_cd.valid_conf( p ) ) return false;
+		if( !m_cd.valid_conf( Point_2(currx_r1,curry_r1),Point_2(currx_r2,curry_r2) ) ) return false;
 
 		// If an intermidiate configuration is invalid, return false
 		//if (!m_cd.one_robot_valid_conf(currentPos,obstacles)) return false;
@@ -246,24 +237,9 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 	return true;
 }
 
-Polygon_2 LocalPlanner::approx_mink(const Segment_2& seg, const Polygon_2& poly)
-{
-	//decompose?
-	std::vector<Point_2> pts;
-	Vector_2 seg_start(seg.source().x(),seg.source().y());
-	Vector_2 seg_end(seg.target().x(),seg.target().y());
-	for(Polygon_2::Vertex_const_iterator it = poly.vertices_begin(); it != poly.vertices_end(); ++it)
-	{
-		pts.push_back((*it) + seg_start);
-		pts.push_back((*it) + seg_end);
-	}
-	std::vector<Point_2> ret;
-	CGAL::convex_hull_2(pts.begin(), pts.end(), std::back_inserter(ret));
-	return Polygon_2(ret.begin(), ret.end());
-}
-
-  bool LocalPlanner::local_planner(Point_d start, Point_d target, double eps )
+  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target ) const
   {
+	  double eps = m_cd.m_epsilon;
 	  
 	bool res = true;
 
@@ -280,7 +256,7 @@ Polygon_2 LocalPlanner::approx_mink(const Segment_2& seg, const Polygon_2& poly)
 		return false;
     }
 
-	cout << "Success for: " << robo1_start << "\t" << robo1_target << "\n";
+	cout << "Success for: " << start << "\t" << target << "\n";
 
 
 	/*
