@@ -95,6 +95,13 @@ void RRT_tree_t::expand(size_t samples)
 	}
 }
 
+Point_d RRT_tree_t::virtual_graph_nearest_neighbor(const Point_d &pt)
+{
+	const Point_2 r1 = m_r1_roadmap.get_nearest_to(Point_2(pt.cartesian(0), pt.cartesian(1))),
+		r2 = m_r2_roadmap.get_nearest_to(Point_2(pt.cartesian(2),pt.cartesian(3)));
+	return this->to_pointd(r1,r2);
+}
+
 const Point_d RRT_tree_t::get_nearest(const Point_d& nearest_to) const
 {
 	return m_knn_container.nearest_neighbor(nearest_to);

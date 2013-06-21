@@ -21,3 +21,7 @@ dRRT_tree_connector_t::dRRT_tree_connector_t(const RRT_tree_t& lhs, const RRT_tr
 		}
 	}
 }
+
+//bool dRRT_tree_connector_t::local_connect(const Point_d& p1, const Point_d& p2)
+//{
+//}
