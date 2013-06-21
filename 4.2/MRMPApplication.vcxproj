@@ -137,6 +137,7 @@
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SRCollisionDetector.cpp" />
+    <ClCompile Include="SRPrm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h" />

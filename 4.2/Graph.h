@@ -35,7 +35,8 @@ protected:
   std::vector<std::vector<double> >  _distance_to_target;
   std::vector<int> _component; 
   std::map<int, Node> _id_node_map;
-  std::map<Node, int, Is_Less_than> _node_id_map;
+  typedef std::map<Node, int, Is_Less_than> node_map_t;
+  node_map_t _node_id_map;
   int _curr_id;
   
 protected:
@@ -191,14 +192,20 @@ public:
 	  return this->_id_node_map[id];
   }
 
-  std::pair<typename Boost_graph::adjacency_iterator,
-                     typename Boost_graph::adjacency_iterator> get_neighbors(const Node& node) const
+  void get_neighbors(const Node& node, std::back_insert_iterator<std::vector<Node> > out) const
   {
-	  std::map<Node, int>::const_iterator it = _node_id_map.find(node);
+	  node_map_t::const_iterator it = _node_id_map.find(node);
 	  assert(it != _node_id_map.end());
 
 	  int id = it->second;
-	  return adjacent_vertices(id, *_graph);
+	  std::pair<adjacency_iterator, adjacency_iterator> p = adjacent_vertices(id, *_graph);
+
+	  adjacency_iterator n_it = p.first,
+		it_end = p.second;
+	  for(; n_it != it_end; ++n_it)
+	  {
+		  *++out = _id_node_map.find(*n_it)->second;
+	  }
   }
 
   // cc utils
