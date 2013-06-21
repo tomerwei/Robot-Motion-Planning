@@ -35,7 +35,7 @@ protected:
   std::vector<std::vector<double> >  _distance_to_target;
   std::vector<int> _component; 
   std::map<int, Node> _id_node_map;
-  std::map<Node, int> _node_id_map;
+  std::map<Node, int, Is_Less_than> _node_id_map;
   int _curr_id;
   
 protected:

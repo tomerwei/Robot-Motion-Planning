@@ -101,7 +101,7 @@ public:
       rearrange();
     return;
   }
-  Point nearest_neighbor(const Point& q) 
+  Point nearest_neighbor(const Point& q) const
   {
 	if (un_inserted_points.empty() && trees.empty())
 	  return Point();
@@ -211,7 +211,7 @@ private:
     }
     return;
   }
-  Point nearest_neighbor(const std::vector<Point>& points_vec, const Point& q)
+  Point nearest_neighbor(const std::vector<Point>& points_vec, const Point& q) const
   {
     typename Kernel::FT sq_d = squared_distance_d<Kernel>(points_vec.front(), q);
     Point nn = points_vec.front();
@@ -227,7 +227,7 @@ private:
     }
     return nn;
   }
-  Point nearest_neighbor(Cgal_kd_tree* cgal_kd_tree_ptr, const Point& q) 
+  Point nearest_neighbor(Cgal_kd_tree* cgal_kd_tree_ptr, const Point& q) const
   {
     Neighbor_search search(*cgal_kd_tree_ptr, q);
     return search.begin()->first;

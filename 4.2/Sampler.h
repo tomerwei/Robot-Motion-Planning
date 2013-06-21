@@ -27,7 +27,8 @@ private:
 
 public:
   Sampler(//double radius,
-		   Polygon_2 robot,
+		   Polygon_2 robot1,
+		   Polygon_2 robot2,
 		   Room room, const CollisionDetector &col, double seed = -1);
 
   ~Sampler(void) { }
@@ -39,19 +40,21 @@ public:
   /* Returns a point that represents a valid (free) configuration of the robot.
    */
   Point_d generate_sample() const;
+  
 
-private:
+
   /* Samples a point in the configuration space of the robot defined by the
    * bounding box of the scenario. This point can be valid or invalid.
    */
   Point_d generate_sample_no_obstacles() const;
-
+private:
   ////////////////////////
   // Data Members
   ////////////////////////
   //double m_radius;              // radius of robots
 
-  Polygon_2 m_robot;
+  Polygon_2 m_robot1;
+  Polygon_2 m_robot2;
   Room m_room;                  // Represents the boundaries of the scenario
   const CollisionDetector &m_col;     // Collision detector
 
@@ -60,5 +63,8 @@ private:
   Point_2 br;
 
   robot_bounds r1;
+  robot_bounds r2;
+
+  mutable std::vector<double> coords;
 };
 #endif

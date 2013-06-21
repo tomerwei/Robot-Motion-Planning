@@ -1,11 +1,15 @@
 #include "RTT_tree_t.h"
 
-RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const Prm& r1_roadmap, const Prm& r2_roadmap)
+RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadmap, const SRPrm& r2_roadmap, const CollisionDetector& collision_detector, const Sampler& sampler)
 : m_root(tree_root)
 , m_knn_container()
 , m_tree()
 , m_r1_roadmap(r1_roadmap)
 , m_r2_roadmap(r2_roadmap)
+, m_cd(collision_detector)
+, m_sampler(sampler)
+, m_cnv()
+, m_knn_out()
 {
 }
 
@@ -14,16 +18,15 @@ Vector_2 RRT_tree_t::make_random_direction_vec()
 	return Vector_2((double)rand()/RAND_MAX,(double)rand()/RAND_MAX);
 }
 
-unsigned int /*RRT_tree_t::*/get_nn_by_direction(
-	Graph<int, Less_than_int>::adjacency_iterator n_begin, 
-	Graph<int, Less_than_int>::adjacency_iterator n_end,
+Point_2 /*RRT_tree_t::*/get_nn_by_direction(
+	const std::vector<Point_2>& pts,
 	const Point_2& from,
 	const Vector_2& dir
 )
 {
 	double max_cos_angle = 0;
-	unsigned int nearest;
-	for(; n_begin != n_end; ++n_begin)
+	Point_2 nearest;
+	for(std::vector<Point_2>::const_iterator n_begin(pts.begin()), n_end(pts.end()); n_begin != n_end; ++n_begin)
 	{
 		Vector_2 vec(from,*n_begin);
 		double mag_dir = CGAL::to_double(dir * dir),
@@ -49,39 +52,38 @@ Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt)
 		Point_2 r1_pt(pt.cartesian(0),pt.cartesian(1));
 		Point_2 r2_pt(pt.cartesian(2),pt.cartesian(3));
 
-		std::pair<typename Graph<int, Less_than_int>::adjacency_iterator,
-				  typename Graph<int, Less_than_int>::adjacency_iterator> r1_neighbor_range =
-			m_r1_roadmap.get_neighbors(r1_pt);
+		std::vector<Point_2> pts;
+		m_r1_roadmap.get_neighbors(r1_pt, std::back_inserter(pts));
 
-		unsigned int nn1 = get_nn_by_direction(r1_neighbor_range.first,r1_neighbor_range.second,r1_pt,r1_direction);
-		Point_2 nn1_pt = m_r1_roadmap.get_point_from_graph_id(nn1);
+		Point_2 nn1_pt = get_nn_by_direction(pts,r1_pt,r1_direction);
 
+		pts.resize(0);
+		m_r2_roadmap.get_neighbors(r2_pt, std::back_inserter(pts));
 	
-		std::pair<typename Graph<int, Less_than_int>::adjacency_iterator,
-				  typename Graph<int, Less_than_int>::adjacency_iterator> r2_neighbor_range =
-			m_r2_roadmap.get_neighbors(r2_pt);
-	
-		unsigned int nn2 = get_nn_by_direction(r2_neighbor_range.first,r2_neighbor_range.second,r2_pt,r2_direction);
-		Point_2 nn2_pt = m_r2_roadmap.get_point_from_graph_id(nn2);
+		Point_2 nn2_pt = get_nn_by_direction(pts,r2_pt,r2_direction);
 
-		std::vector<Kernel::RT> pt_vec;
-		pt_vec.push_back(nn1_pt.x());
-		pt_vec.push_back(nn1_pt.y());
-		pt_vec.push_back(nn2_pt.x());
-		pt_vec.push_back(nn2_pt.y());
-		Point_d nn_pt(4, pt_vec.begin(),pt_vec.end());
-
-		if (no_robot_collision(pt,nn_pt)) {
-			return nn_pt;
+		if (!m_cd.do_moved_robots_interesct(nn1_pt,nn2_pt))
+		{
+			return to_pointd(nn1_pt,nn2_pt);
 		}
 	}
+}
+
+Point_d RRT_tree_t::to_pointd(const Point_2& r1, const Point_2& r2)
+{
+	m_cnv.resize(0);
+	m_cnv.push_back(CGAL::to_double(r1.x()));
+	m_cnv.push_back(CGAL::to_double(r1.y()));
+	m_cnv.push_back(CGAL::to_double(r2.x()));
+	m_cnv.push_back(CGAL::to_double(r2.y()));
+	return Point_d(4,m_cnv.begin(),m_cnv.end());
 }
 
 void RRT_tree_t::expand(size_t samples)
 {
 	for(size_t i(0); i < samples; ++i)
 	{
-		Point_d q_rand = make_random_sample();
+		Point_d q_rand = m_sampler.generate_sample_no_obstacles();
 		Point_d q_near = virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
 		Point_d q_new = new_from_direction_oracle(q_near);
 

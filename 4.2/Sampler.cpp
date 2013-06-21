@@ -52,3 +52,14 @@ Point_d Sampler::generate_sample() const
 		if (m_col.valid_conf(p)) return p;
     }
 }
+Point_d Sampler::generate_sample_no_obstacles() const
+{
+	coords.resize(0);
+    /*double randx1 = */coords.push_back(r1.xMin + r1.xMax * ((double)rand())/((double)RAND_MAX));
+	/*double randy1 = */coords.push_back(r1.yMin + r1.yLen * ((double)rand())/((double)RAND_MAX));  
+	/*double randx2 = */coords.push_back(r2.xMin + r2.xLen * ((double)rand())/((double)RAND_MAX));
+	/*double randy2 = */coords.push_back(r2.yMin + r2.yLen * ((double)rand())/((double)RAND_MAX));
+	Point_d p(4,coords.begin(),coords.end());
+
+	return p;
+}

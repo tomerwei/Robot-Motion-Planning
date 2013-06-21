@@ -136,6 +136,7 @@
     <ClCompile Include="RTT_tree_t.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SRCollisionDetector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h" />
@@ -147,11 +148,15 @@
     <ClInclude Include="GeneratedFiles\ui_MRMPDrawingBox.h" />
     <ClInclude Include="get_bounding_circle_center.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="Kd_tree.h" />
     <ClInclude Include="Kd_tree_d.h" />
     <ClInclude Include="Planner.h" />
     <ClInclude Include="Prm.h" />
     <ClInclude Include="RTT_tree_t.h" />
     <ClInclude Include="Sampler.h" />
+    <ClInclude Include="SRCollisionDetector.h" />
+    <ClInclude Include="SRPrm.h" />
+    <ClInclude Include="SRSampler.h" />
     <CustomBuild Include="Scene.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing Scene.h...</Message>

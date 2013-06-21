@@ -117,6 +117,9 @@
     <ClCompile Include="CollisionDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SRCollisionDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_typedef.h">
@@ -159,6 +162,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Prm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRPrm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Kd_tree.h">
+      <Filter>Header Files\Auxilary</Filter>
+    </ClInclude>
+    <ClInclude Include="SRCollisionDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SRSampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

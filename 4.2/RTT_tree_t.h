@@ -5,26 +5,39 @@
 #include "Kd_tree_d.h"
 #include "Graph.h"
 #include "Sampler.h"
-#include "Prm.h"
+#include "SRPrm.h"
+#include "CollisionDetector.h"
 #include "basic_typedef.h"
 #include <vector>
 
 class RRT_tree_t
 {
 public:
-	RRT_tree_t(const std::vector<Conf>& tree_root, const Prm& r1_roadmap, const Prm& r2_roadmap);
+	RRT_tree_t(
+		const std::vector<Conf>& tree_root, 
+		const SRPrm& r1_roadmap, 
+		const SRPrm& r2_roadmap, 
+		const CollisionDetector& collision_detector, 
+		const Sampler& sampler
+	);
 	void expand(size_t samples);
 	const Point_d get_nearest(const Point_d& nearest_to) const;
 
 private:
 	Vector_2 make_random_direction_vec();
 	Point_d new_from_direction_oracle(const Point_d &pt);
+	Point_d virtual_graph_nearest_neighbor(const Point_d &pt);
+	Point_d to_pointd(const Point_2& r1, const Point_2& r2);
 private:
 	std::vector<Conf> m_root;
 	Kd_tree_d<Kernel_d> m_knn_container;
-	Graph<Kernel_d> m_tree;
-	const Prm &m_r1_roadmap;
-	const Prm &m_r2_roadmap;
+	Graph<Point_d,point_d_less> m_tree;
+	const SRPrm &m_r1_roadmap;
+	const SRPrm &m_r2_roadmap;
+	const CollisionDetector& m_cd;
+	std::vector<double> m_cnv;
+	const Sampler& m_sampler;
+	mutable std::vector<Point_d> m_knn_out;
 };
 
 #endif //__RTT_TREE_T_H_DEFINED__
