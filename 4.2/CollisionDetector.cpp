@@ -110,7 +110,8 @@ bool CollisionDetector::do_moved_robots_interesct(
 	const Point_2 &robot2
 ) const
 {
-	Point_2 pRobotTag(robot1.x()-robot2.x(), robot1.y()-robot2.y());
+	Point_2 pRobotTag(CGAL::to_double(robot1.x())-CGAL::to_double(robot2.x()), 
+		CGAL::to_double(robot1.y())-CGAL::to_double(robot2.y()));
 
 	return (m_r1_min_r2.oriented_side(pRobotTag) == CGAL::ON_BOUNDED_SIDE);
 }
