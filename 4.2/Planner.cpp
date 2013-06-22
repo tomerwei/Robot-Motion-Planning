@@ -30,7 +30,7 @@ Planner::~Planner()
 /*	This function is invoked by the GUI and is assumed to update the resulting */
 void Planner::run()
 {
-	double epsilon = 0.1;
+	double epsilon = 1;
 	size_t num_samples(300);
 
 
@@ -51,6 +51,8 @@ void Planner::run()
 	CollisionDetector cdetector_both(robot_poly1, robot_poly2, &m_obstacles, epsilon);
 	Sampler sampler_both(robot_poly1, robot_poly2, m_room, cdetector_both);
 
+	roadmap1.generate_roadmap();
+	roadmap2.generate_roadmap();
 	//todo: check both roadmaps have a path?
 
 	RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both, sampler_both);
@@ -62,9 +64,10 @@ void Planner::run()
 	dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler_both,local_planner,10);
 	if (connector.is_connected())
 	{
-		m_path = get_path(src_tree, connector.lhs_conn_pt());
-		m_path.push_back(get_path(connector));
-		m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
+		std::cout << "connected both trees" << std::endl;
+		//m_path = get_path(src_tree, connector.lhs_conn_pt());
+		//m_path.push_back(get_path(connector));
+		//m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
 	}
 	//	run this method when you finish to produce the path
 	//	IMPORTANT: the result should be put in m_path

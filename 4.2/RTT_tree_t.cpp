@@ -11,6 +11,7 @@ RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadm
 , m_cnv()
 , m_knn_out()
 {
+	m_tree.add_vertex(to_pointd(tree_root[0],tree_root[1]));
 }
 
 Vector_2 RRT_tree_t::make_random_direction_vec()
@@ -90,8 +91,12 @@ void RRT_tree_t::expand(size_t samples)
 		if (!m_tree.is_in_graph(q_new))
 		{
 			m_tree.add_vertex(q_new);
-			m_tree.add_edge(q_near,q_new);
 		}
+		if (!m_tree.is_in_graph(q_near))
+		{
+			m_tree.add_vertex(q_near);
+		}
+		m_tree.add_edge(q_near,q_new);
 	}
 }
 
