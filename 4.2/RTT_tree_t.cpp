@@ -45,15 +45,17 @@ Point_2 /*RRT_tree_t::*/get_nn_by_direction(
 	return nearest;
 }
 
-Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt)
+Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt, const Point_d& dir_of)
 {
 	while (true) {
 		//the full q is (r1_direction.x,r1_direction.y,r2_direction.x,r2_direction.y)
-		Vector_2 r1_direction = make_random_direction_vec();
-		Vector_2 r2_direction = make_random_direction_vec();
-
 		Point_2 r1_pt(pt.cartesian(0),pt.cartesian(1));
 		Point_2 r2_pt(pt.cartesian(2),pt.cartesian(3));
+
+		const Point_2 dir1(dir_of.cartesian(0),dir_of.cartesian(1)),
+			dir2(dir_of.cartesian(2),dir_of.cartesian(3));
+		Vector_2 r1_direction = dir1 - r1_pt;
+		Vector_2 r2_direction = dir2 - r2_pt;
 
 		std::vector<Point_2> pts;
 		m_r1_roadmap.get_neighbors(r1_pt, std::back_inserter(pts));
@@ -65,10 +67,7 @@ Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt)
 	
 		Point_2 nn2_pt = get_nn_by_direction(pts,r2_pt,r2_direction);
 
-		if (!m_cd.do_moved_robots_interesct(nn1_pt,nn2_pt))
-		{
-			return to_pointd(nn1_pt,nn2_pt);
-		}
+		return to_pointd(nn1_pt,nn2_pt);
 	}
 }
 
@@ -84,23 +83,23 @@ Point_d RRT_tree_t::to_pointd(const Point_2& r1, const Point_2& r2)
 
 void RRT_tree_t::expand(size_t samples)
 {
-	for(size_t i(0); i < samples; ++i)
+	for(size_t i(0); i < samples; )
 	{
 		Point_d q_rand = m_sampler.generate_sample_no_obstacles();
 		Point_d q_near = m_knn_container.nearest_neighbor(q_rand);//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
-		Point_d q_new = new_from_direction_oracle(q_near);
+		Point_d q_new = new_from_direction_oracle(q_near,q_rand);
+		if (!m_cd.valid_conf(q_new)) //TODO: across whole path?
+		{
+			continue;
+		}
 
+		++i;
 		if (!m_tree.is_in_graph(q_new))
 		{
 			m_tree.add_vertex(q_new);
 			m_knn_container.insert(q_new);
+			m_tree.add_edge(q_near,q_new);
 		}
-		if (!m_tree.is_in_graph(q_near))
-		{
-			m_tree.add_vertex(q_near);
-			m_knn_container.insert(q_near);
-		}
-		m_tree.add_edge(q_near,q_new);
 	}
 }
 
