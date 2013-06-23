@@ -25,7 +25,7 @@ public:
 
 private:
 	Vector_2 make_random_direction_vec();
-	Point_d new_from_direction_oracle(const Point_d &pt);
+	Point_d new_from_direction_oracle(const Point_d &pt, const Point_d& dir_of);
 	Point_d virtual_graph_nearest_neighbor(const Point_d &pt);
 	Point_d to_pointd(const Point_2& r1, const Point_2& r2);
 private:
