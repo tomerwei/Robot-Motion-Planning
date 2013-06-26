@@ -31,7 +31,7 @@ Planner::~Planner()
 void Planner::run()
 {
 	double epsilon = 1;
-	size_t num_samples(300);
+	size_t num_samples(500);
 
 
 	assert(m_start_confs.size() == 2);
@@ -53,21 +53,25 @@ void Planner::run()
 
 	roadmap1.generate_roadmap();
 	roadmap2.generate_roadmap();
-	//todo: check both roadmaps have a path?
-
-	RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both, sampler_both);
-	RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,cdetector_both, sampler_both);
-
-	src_tree.expand(num_samples);
-	tgt_tree.expand(num_samples);
-	LocalPlanner local_planner(cdetector_both);
-	dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler_both,local_planner,10);
-	if (connector.is_connected())
+	
+	if (!roadmap1.retrieve_path().empty() && !roadmap2.retrieve_path().empty())
 	{
-		std::cout << "connected both trees" << std::endl;
-		//m_path = get_path(src_tree, connector.lhs_conn_pt());
-		//m_path.push_back(get_path(connector));
-		//m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
+
+		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both, sampler_both);
+		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,cdetector_both, sampler_both);
+
+		src_tree.expand(num_samples*num_samples);
+		tgt_tree.expand(num_samples*num_samples);
+		LocalPlanner local_planner(cdetector_both);
+		dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler_both,local_planner,100);
+		if (connector.is_connected())
+		{
+			std::cout << "connected both trees" << std::endl;
+			//m_path = get_path(src_tree, connector.lhs_conn_pt());
+			//m_path.push_back(get_path(connector));
+			//m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
+		}
+
 	}
 	//	run this method when you finish to produce the path
 	//	IMPORTANT: the result should be put in m_path
