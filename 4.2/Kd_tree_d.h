@@ -6,22 +6,14 @@
 #include <CGAL/Cartesian_d.h>
 #include <basic_typedef.h>
 
-#define MAKE_POINTS_UNIQUE 0 
+#define MAKE_POINTS_UNIQUE 1
 
 template <typename Kernel>
 typename Kernel::FT squared_distance_d(	const typename Kernel::Point_d& p, 
 										const typename Kernel::Point_d& q)
 {
-	//typename Kernel::Vector_d v = p - q;
-	//return v.squared_length();
-
-	Point_2 r1_p(p.cartesian(0),p.cartesian(1)),
-		r2_p(p.cartesian(2),p.cartesian(3)),
-		r1_q(p.cartesian(0),p.cartesian(1)),
-		r2_q(p.cartesian(2),p.cartesian(3));
-	Vector_2 v1 = r1_p - r1_q;
-	Vector_2 v2 = r2_p - r2_q;
-	return CGAL::to_double(v1.squared_length()) + CGAL::to_double(v2.squared_length());
+	typename Kernel::Vector_d v = p - q;
+	return v.squared_length();
 }
 
 

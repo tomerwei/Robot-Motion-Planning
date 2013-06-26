@@ -60,8 +60,8 @@ void Planner::run()
 		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both, sampler_both);
 		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,cdetector_both, sampler_both);
 
-		src_tree.expand(num_samples*num_samples);
-		tgt_tree.expand(num_samples*num_samples);
+		src_tree.expand(num_samples);
+		tgt_tree.expand(num_samples);
 		LocalPlanner local_planner(cdetector_both);
 		dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler_both,local_planner,100);
 		if (connector.is_connected())

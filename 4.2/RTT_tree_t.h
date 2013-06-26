@@ -30,7 +30,7 @@ private:
 	Point_d to_pointd(const Point_2& r1, const Point_2& r2);
 private:
 	std::vector<Conf> m_root;
-	Kd_tree_d<Kernel_d> m_knn_container;
+	mutable Kd_tree_d<Kernel_d> m_knn_container;
 	Graph<Point_d,point_d_less> m_tree;
 	const SRPrm &m_r1_roadmap;
 	const SRPrm &m_r2_roadmap;
@@ -38,6 +38,7 @@ private:
 	std::vector<double> m_cnv;
 	const Sampler& m_sampler;
 	mutable std::vector<Point_d> m_knn_out;
+
 };
 
 #endif //__RTT_TREE_T_H_DEFINED__

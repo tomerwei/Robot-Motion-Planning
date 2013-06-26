@@ -83,10 +83,13 @@ Point_d RRT_tree_t::to_pointd(const Point_2& r1, const Point_2& r2)
 
 void RRT_tree_t::expand(size_t samples)
 {
+	std::vector<Point_d> nn;
 	for(size_t i(0); i < samples; )
 	{
 		Point_d q_rand = m_sampler.generate_sample_no_obstacles();
-		Point_d q_near = m_knn_container.nearest_neighbor(q_rand);//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
+		nn.resize(0);
+		m_knn_container.k_nearest_neighbors(q_rand,1,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
+		Point_d q_near = nn.front();
 		Point_d q_new = new_from_direction_oracle(q_near,q_rand);
 		if (!m_cd.valid_conf(q_new)) //TODO: across whole path?
 		{
@@ -112,5 +115,9 @@ Point_d RRT_tree_t::virtual_graph_nearest_neighbor(const Point_d &pt)
 
 const Point_d RRT_tree_t::get_nearest(const Point_d& nearest_to) const
 {
-	return m_knn_container.nearest_neighbor(nearest_to);
+	m_knn_out.resize(0);
+	m_knn_container.k_nearest_neighbors(nearest_to,2,std::back_inserter(m_knn_out));
+	if (nearest_to == m_knn_out.at(0))
+		return m_knn_out.at(1);
+	return m_knn_out.front();
 }
