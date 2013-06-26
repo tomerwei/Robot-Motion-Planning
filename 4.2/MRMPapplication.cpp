@@ -9,7 +9,7 @@
 *	Date:			29/3/2011
 *******************************************************************/
 
-#include "MRMPApplication.h"
+#include "mrmpapplication.h"
 #include <QString>
 #include <QFileDialog>
 #include <iostream>

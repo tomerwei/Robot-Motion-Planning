@@ -14,7 +14,7 @@
 #define QTTESTAPPL_H
 
 #include <QtGui/QMainWindow>
-#include "ui_MRMPApplication.h"
+#include "ui_mrmpapplication.h"
 #include <QFileDialog>
 
 class MRMPApplication : public QMainWindow

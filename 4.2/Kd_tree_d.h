@@ -4,6 +4,7 @@
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/K_neighbor_search.h>
 #include <CGAL/Cartesian_d.h>
+#include <basic_typedef.h>
 
 #define MAKE_POINTS_UNIQUE 0 
 

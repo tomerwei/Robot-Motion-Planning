@@ -6,7 +6,7 @@
 
 #include <QtGui/QApplication>
 
-#include "MRMPApplication.h"
+#include "mrmpapplication.h"
 
 int main(int argc, char* argv[])
 {

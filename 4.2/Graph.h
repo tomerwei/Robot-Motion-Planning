@@ -192,9 +192,9 @@ public:
 	  return this->_id_node_map[id];
   }
 
-  void get_neighbors(const Node& node, std::back_insert_iterator<std::vector<Node> > out) const
+  void get_neighbors(const Node& node, std::back_insert_iterator< std::vector < Node > > out) const
   {
-	  node_map_t::const_iterator it = _node_id_map.find(node);
+	  typename node_map_t::const_iterator it = _node_id_map.find(node);
 	  assert(it != _node_id_map.end());
 
 	  int id = it->second;

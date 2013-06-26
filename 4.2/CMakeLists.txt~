@@ -62,7 +62,6 @@ if ( CGAL_FOUND AND CGAL_Qt4_FOUND AND QT4_FOUND )
     Planner.cpp
     RTT_tree_t.cpp
     dRRT_tree_connector_t.cpp
-    CollisionDetector.cpp
     SRCollisionDetector.cpp
     Sampler.cpp
     MRMPDrawingBox.cpp

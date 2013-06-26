@@ -6,6 +6,7 @@
 #include "CollisionDetector.h"
 #include "Sampler.h"
 #include "Kd_tree_d.h"
+#include "SRPrm.h"
 #include <map>
 #include <utility>
 
