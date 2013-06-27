@@ -168,6 +168,7 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 
 	double distance_r2 = sqrt(pow(x1_r2 - x2_r2, 2) + pow(y1_r2 - y2_r2,2));
 
+
 	// calculate how many steps are required for second robot
 	int step_num_r2 = floor((distance_r2 - step_size) / step_size);
 	double vx_r2 = x2_r2 - x1_r2;
@@ -176,23 +177,18 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 	//select the largest number of steps of both robot for loop iteration check
 	double step_num =  step_num_r1 > step_num_r2 ? step_num_r1 : step_num_r2;
 
-	double step_size_r1 = distance_r1/step_num;
-	double step_size_r2 = distance_r2/step_num;
+	Vector_2 step_r1 = Vector_2(start_r1,target_r1)/step_num;
+	Vector_2 step_r2 = Vector_2(start_r2,target_r2)/step_num;
 
 	std::vector<double> coords;
 
 	for (int i = 1; i <= step_num; ++i)
 	{
 		// generate a configuration for every step
-		double offset_r1 =  (i * step_size_r1) / (distance_r1 - step_size_r1);
-		double currx_r1 = x1_r1 + vx_r1 * offset_r1;
-		double curry_r1 = y1_r1 + vy_r1 * offset_r1;
+		Point_2 r1_new = start_r1 + step_r1;
+		Point_2 r2_new = start_r2 + step_r2;
 
-		double offset_r2 =  (i * step_size_r2) / (distance_r2 - step_size_r2);
-		double currx_r2 = x1_r2 + vx_r2 * offset_r2;
-		double curry_r2 = y1_r2 + vy_r2 * offset_r2;
-
-		if( !m_cd.valid_conf( Point_2(currx_r1,curry_r1),Point_2(currx_r2,curry_r2) ) ) return false;
+		if( !m_cd.valid_conf( r1_new, r2_new ) ) return false;
 
 		// If an intermidiate configuration is invalid, return false
 		//if (!m_cd.one_robot_valid_conf(currentPos,obstacles)) return false;

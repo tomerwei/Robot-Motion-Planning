@@ -50,6 +50,7 @@ void Planner::run()
 
 	CollisionDetector cdetector_both(robot_poly1, robot_poly2, &m_obstacles, epsilon);
 	Sampler sampler_both(robot_poly1, robot_poly2, m_room, cdetector_both);
+	LocalPlanner local_planner(cdetector_both);
 
 	roadmap1.generate_roadmap();
 	roadmap2.generate_roadmap();
@@ -57,12 +58,12 @@ void Planner::run()
 	if (!roadmap1.retrieve_path().empty() && !roadmap2.retrieve_path().empty())
 	{
 
-		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both, sampler_both);
-		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,cdetector_both, sampler_both);
+		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, local_planner, sampler_both);
+		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,local_planner, sampler_both);
 
 		src_tree.expand(num_samples);
 		tgt_tree.expand(num_samples);
-		LocalPlanner local_planner(cdetector_both);
+		
 		dRRT_tree_connector_t connector(src_tree,tgt_tree, sampler_both,local_planner,100);
 		if (connector.is_connected())
 		{

@@ -17,7 +17,7 @@ public:
 		const std::vector<Conf>& tree_root, 
 		const SRPrm& r1_roadmap, 
 		const SRPrm& r2_roadmap, 
-		const CollisionDetector& collision_detector, 
+		const LocalPlanner& local_planner, 
 		const Sampler& sampler
 	);
 	void expand(size_t samples);
@@ -34,7 +34,7 @@ private:
 	Graph<Point_d,point_d_less> m_tree;
 	const SRPrm &m_r1_roadmap;
 	const SRPrm &m_r2_roadmap;
-	const CollisionDetector& m_cd;
+	const LocalPlanner& m_local_planner;
 	std::vector<double> m_cnv;
 	const Sampler& m_sampler;
 	mutable std::vector<Point_d> m_knn_out;
