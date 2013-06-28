@@ -11,7 +11,7 @@ class dRRT_tree_connector_t
 public:
 	dRRT_tree_connector_t(const RRT_tree_t& lhs, const RRT_tree_t& rhs, const Sampler &sampler, const LocalPlanner& lp, size_t p);
 	bool is_connected() const {return m_succeeded;}
-	const list<Point_d>& get_path() const;
+	void get_path(  RRT_tree_t& tree1, const Point_d pnt1 );
 	const Point_d &lhs_conn_pt() const {return m_lhs_conn_pt; }
 	const Point_d &rhs_conn_pt() const {return m_rhs_conn_pt; }
 private:

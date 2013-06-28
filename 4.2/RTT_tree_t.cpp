@@ -10,8 +10,10 @@ RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadm
 , m_sampler(sampler)
 , m_cnv()
 , m_knn_out()
+, m_tree_root()
 {
 	Point_d root = to_pointd(tree_root[0],tree_root[1]);
+	this->m_tree_root = root ;
 	m_tree.add_vertex(root);
 	m_knn_container.insert(root);
 }
@@ -71,6 +73,12 @@ Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt, const Point_d& 
 	}
 }
 
+Point_d RRT_tree_t::get_root()
+{
+	return m_tree_root;
+}
+
+
 Point_d RRT_tree_t::to_pointd(const Point_2& r1, const Point_2& r2)
 {
 	m_cnv.resize(0);
@@ -105,6 +113,16 @@ void RRT_tree_t::expand(size_t samples)
 		}
 	}
 }
+
+void RRT_tree_t::get_nearest_neighbors( Point_d& nearest_to,  std::back_insert_iterator<std::vector<Point_d> > out )
+{
+	std::vector<Point_d> nn;
+	nn.resize(0);
+	m_knn_container.k_nearest_neighbors(nearest_to,10,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
+	std::copy( nn.begin() , nn.end(), out );
+}
+
+
 
 Point_d RRT_tree_t::virtual_graph_nearest_neighbor(const Point_d &pt)
 {

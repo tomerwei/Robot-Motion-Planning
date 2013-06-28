@@ -21,7 +21,9 @@ public:
 		const Sampler& sampler
 	);
 	void expand(size_t samples);
+	void get_nearest_neighbors( Point_d& nearest_to, std::back_insert_iterator<std::vector<Point_d> > out );
 	const Point_d get_nearest(const Point_d& nearest_to) const;
+	Point_d get_root();
 
 private:
 	Vector_2 make_random_direction_vec();
@@ -38,6 +40,7 @@ private:
 	std::vector<double> m_cnv;
 	const Sampler& m_sampler;
 	mutable std::vector<Point_d> m_knn_out;
+	Point_d m_tree_root;
 
 };
 
