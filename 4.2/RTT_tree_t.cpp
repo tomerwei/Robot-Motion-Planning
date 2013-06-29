@@ -3,7 +3,7 @@
 RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadmap, const SRPrm& r2_roadmap, const LocalPlanner& local_planner, const Sampler& sampler)
 : m_root(tree_root)
 , m_knn_container()
-, m_tree()
+, m_tree(0)
 , m_r1_roadmap(r1_roadmap)
 , m_r2_roadmap(r2_roadmap)
 , m_local_planner(local_planner)
@@ -11,10 +11,17 @@ RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadm
 , m_cnv()
 , m_knn_out()
 , m_tree_root()
+, vertexID()
+, vertexIDToPoint()
 {
 	Point_d root = to_pointd(tree_root[0],tree_root[1]);
 	this->m_tree_root = root ;
-	m_tree.add_vertex(root);
+
+	//m_tree.add_vertex(root);
+	m_tree->add_vertex( 1 );
+	vertexID[ root ] = 1;
+	vertexIDToPoint[ 1 ] = root;
+
 	m_knn_container.insert(root);
 }
 
@@ -103,26 +110,54 @@ void RRT_tree_t::expand(size_t samples)
 		}
 
 		++i;
-		if (!m_tree.is_in_graph(q_new))
+
+
+		point_to_cost_map_t::const_iterator iter = vertexID.find( q_new );
+
+		if(!( iter !=  vertexID.end() ))
 		{
-			m_tree.add_vertex(q_new);
-			m_knn_container.insert(q_new);
-			m_tree.add_edge(q_near,q_new);
+
+//			if (!m_tree.is_in_graph(q_new))
+//			{
+				int q_newId = vertexID.size() + 1;
+
+				m_tree->add_vertex( q_newId );
+				vertexID[ q_new ] = q_newId;
+				vertexIDToPoint[ q_newId ] = q_new;
+
+				m_knn_container.insert(q_new);
+
+				int q_near_id = vertexID[ q_near ];
+
+				m_tree->add_edge(q_near_id, q_newId);
+//			}
 		}
 	}
 }
 
+/*
 void RRT_tree_t::get_nearest_neighbors( Point_d& nearest_to,  std::back_insert_iterator<std::vector<Point_d> > out )
 {
 	std::vector<Point_d> nn;
 	nn.resize(0);
 	m_knn_container.k_nearest_neighbors( nearest_to, 4, std::back_inserter(nn) );
 
-	//for( std::vector<Point_d>::const_iterator i = nn.begin(); i != nn.end(); ++i)
-	 //   std::cout << *i << '\n';
-
-	//m_knn_container.k_nearest_neighbors(nearest_to,10,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
+	m_knn_container.k_nearest_neighbors(nearest_to,10,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
 	std::copy( nn.begin() , nn.end(), out );
+}
+*/
+
+
+void RRT_tree_t::get_neighbors(const Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > out ) const
+{
+	point_to_cost_map_t::const_iterator  pIt = vertexID.find( pt );
+	std::vector<int> pt_ids;
+	m_tree->get_neighbors(pIt->second,std::back_inserter(pt_ids));
+
+	BOOST_FOREACH(int id,pt_ids)
+	{
+		*++out = vertexIDToPoint.find(id)->second;
+	}
 }
 
 

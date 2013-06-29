@@ -65,7 +65,7 @@ vector <Point_d>  ida_star_successors_get( RRT_tree_t& tree, Point_d node )
 {
 	std::vector<Point_d> nn;
 	nn.resize(0);
-	tree.get_nearest_neighbors( node , std::back_inserter(nn) );
+	tree.get_neighbors( node , std::back_inserter(nn) );
 	return nn;
 }
 
@@ -74,7 +74,6 @@ vector <Point_d>  ida_star_successors_get( RRT_tree_t& tree, Point_d node )
 //lets do: root = m_lhs or rhs_conn
 //goal: tree root
 
-static bool m_goal = false;
 
 vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
 										RRT_tree_t& tree,
@@ -115,7 +114,7 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
 
     //std::cout << "path_so_far: "<< path_so_far.size() <<"\n";
 
-    if( to_abort ||  m_goal || minimum_cost > *cost_limit )
+    if( to_abort ||  minimum_cost > *cost_limit )
     {
     	*cost_limit = minimum_cost;
     	//std::cout << "min_cost larger than cost limit " << minimum_cost << " " << (*cost_limit) << " \n";
@@ -126,19 +125,14 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
     {
     	//  	*cost_limit = -1;
         //std::cout << "goal found. \n";
-        m_goal = true;
         return path_so_far;
     }
 
-    double next_cost_limit = 999999.0;  //INIFINITE
+    double next_cost_limit = 9999999.0;  //INIFINITE
     vector   < vector < Point_d > > all_solutions;
     vector   < double > all_solutions_cost;
 
     vector <Point_d > successors = ida_star_successors_get( tree, node );
-
-    //std::cout << "successors: "<< successors.size() <<"\n";
-	//for( std::vector<Point_d>::const_iterator i = successors.begin(); i != successors.end(); ++i)
-	//    std::cout << *i << '\n';
 
     for( vector<Point_d>::const_iterator s = successors.begin() ; s != successors.end() ; s++ )
     {
@@ -146,7 +140,7 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
     	if( *s != node )
     	{
     		double new_start_cost = cost_so_far + configuration_distance( node , *s );
-    		double new_cost_limit = configuration_distance( start, goal) * 6;
+    		double new_cost_limit = 9999999;//configuration_distance( start, goal) * 6;
 
     		//std::cout << "new_pnt: "<< (*s) <<  ", old_pnt: " << node <<  "\n";
     		//std::cout << "new_start_cost: "<< new_start_cost <<"\n";
@@ -172,8 +166,8 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
     if( all_solutions.size() > 0 )
     {
 
-    	int   tmp_cost_limit = -1;
-    	int   pos             =  0;
+    	double   tmp_cost_limit  =  -17;
+    	int       pos             =  0;
 
     	for( int i = 0; i < all_solutions_cost.size(); ++i )
     	{
@@ -209,13 +203,17 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
     return vector<Point_d >(NULL);
 }
 
-vector <Point_d> dRRT_tree_connector_t::ida_algorithm( RRT_tree_t& tree, Point_d start, Point_d goal )
+vector <Point_d> dRRT_tree_connector_t::ida_algorithm( RRT_tree_t& tree,
+		                                                    Point_d start,
+		                                                    Point_d goal,
+		                                                    std::back_insert_iterator<std::list<Point_d> > out )
 {
 	vector     < Point_d >  start_list;
 	vector     < Point_d >  solution;
 
-	double   m_cost_limit   =  configuration_distance( start, goal) * 6;
+	double   m_cost_limit   =  9999999;//configuration_distance( start, goal) * 8;
 
+	node_cost.clear();
 	start_list.resize(0);
 	solution.resize(0);
 
@@ -231,6 +229,8 @@ vector <Point_d> dRRT_tree_connector_t::ida_algorithm( RRT_tree_t& tree, Point_d
 
     	 for( std::vector<Point_d>::const_iterator i = solution.begin(); i != solution.end(); ++i)
     		 std::cout << *i << '\n';
+
+    	 std::copy( solution.begin() , solution.end(), out );
      }
 
 	return solution;
@@ -242,9 +242,19 @@ bool a_star_algorithm( Point_d start, Point_d goal )
 	return false;
 }
 
-void dRRT_tree_connector_t::get_path( RRT_tree_t& tree, Point_d connect_pnt )
+list < Point_d > dRRT_tree_connector_t::get_path( RRT_tree_t& tree1, Point_d connect_pnt1,
+													  RRT_tree_t& tree2, Point_d connect_pnt2 )
 {
-	Point_d root( tree.get_root() );
-	ida_algorithm( tree, connect_pnt , root );
+	list < Point_d > path1;
+	list < Point_d > path2;
+
+	Point_d root1( tree1.get_root() );
+	ida_algorithm( tree1, connect_pnt1 , root1, std::back_inserter(path1) );
+
+	Point_d root2( tree2.get_root() );
+	ida_algorithm( tree2, connect_pnt2, root2, std::back_inserter(path2));
+
+
+	return path1;
 }
 
