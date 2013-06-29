@@ -261,7 +261,7 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 		return false;
     }
 
-	cout << "Success for: " << start << "\t" << target << "\n";
+	//cout << "Success for: " << start << "\t" << target << "\n";
 
 
 	/*

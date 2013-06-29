@@ -23,6 +23,7 @@ public:
 		const std::vector<Conf>& tree_root, 
 		const SRPrm& r1_roadmap, 
 		const SRPrm& r2_roadmap, 
+		const CollisionDetector& cd,
 		const LocalPlanner& local_planner, 
 		const Sampler& sampler
 	);
@@ -43,6 +44,7 @@ private:
 	Graph<int, Less_than_int> m_tree;
 	const SRPrm &m_r1_roadmap;
 	const SRPrm &m_r2_roadmap;
+	const CollisionDetector &m_cd;
 	const LocalPlanner& m_local_planner;
 	std::vector<double> m_cnv;
 	const Sampler& m_sampler;

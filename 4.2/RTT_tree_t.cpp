@@ -1,11 +1,12 @@
 #include "RTT_tree_t.h"
 
-RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadmap, const SRPrm& r2_roadmap, const LocalPlanner& local_planner, const Sampler& sampler)
+RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadmap, const SRPrm& r2_roadmap,const CollisionDetector&cd, const LocalPlanner& local_planner, const Sampler& sampler)
 : m_root(tree_root)
 , m_knn_container()
 , m_tree()
 , m_r1_roadmap(r1_roadmap)
 , m_r2_roadmap(r2_roadmap)
+, m_cd(cd)
 , m_local_planner(local_planner)
 , m_sampler(sampler)
 , m_cnv()
@@ -104,7 +105,11 @@ void RRT_tree_t::expand(size_t samples)
 		Point_d q_near = m_knn_container.nearest_neighbor(q_rand);//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
 		Point_d q_new = new_from_direction_oracle(q_near,q_rand);
 		
-		if (!m_local_planner.local_planner(q_new,q_near,false)) //whole path, no obstacles
+		if (!m_cd.valid_conf(q_new))
+		{
+			continue;
+		}
+		if (!m_local_planner.local_planner(q_new,q_near)) //whole path
 		{
 			continue;
 		}

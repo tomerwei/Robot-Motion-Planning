@@ -58,8 +58,8 @@ void Planner::run()
 	if (!roadmap1.retrieve_path().empty() && !roadmap2.retrieve_path().empty())
 	{
 
-		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, local_planner, sampler_both);
-		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,local_planner, sampler_both);
+		RRT_tree_t src_tree(m_start_confs, roadmap1,roadmap2, cdetector_both,local_planner, sampler_both);
+		RRT_tree_t tgt_tree(m_target_confs, roadmap1,roadmap2,cdetector_both,local_planner, sampler_both);
 
 		src_tree.expand(num_samples);
 		tgt_tree.expand(num_samples);
