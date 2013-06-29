@@ -68,7 +68,7 @@ void SRPrm::generate_roadmap()
 	{
 		Point_2 p = m_sampler.generate_sample();
 
-		if( m_col.valid_conf( p) )
+		if( (vertexID.find(p) == vertexID.end()) && m_col.valid_conf( p) )
 		{
 			vertexID[p] = i;
 			vertexIDToPoint[i] = p;
