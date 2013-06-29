@@ -116,7 +116,12 @@ void RRT_tree_t::get_nearest_neighbors( Point_d& nearest_to,  std::back_insert_i
 {
 	std::vector<Point_d> nn;
 	nn.resize(0);
-	m_knn_container.k_nearest_neighbors(nearest_to,10,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
+	m_knn_container.k_nearest_neighbors( nearest_to, 4, std::back_inserter(nn) );
+
+	//for( std::vector<Point_d>::const_iterator i = nn.begin(); i != nn.end(); ++i)
+	 //   std::cout << *i << '\n';
+
+	//m_knn_container.k_nearest_neighbors(nearest_to,10,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
 	std::copy( nn.begin() , nn.end(), out );
 }
 

@@ -68,6 +68,11 @@ void Planner::run()
 		if (connector.is_connected())
 		{
 			std::cout << "connected both trees" << std::endl;
+
+			Point_d conn_pt = connector.rhs_conn_pt();
+
+			connector.get_path( src_tree, conn_pt );
+
 			//m_path = get_path(src_tree, connector.lhs_conn_pt());
 			//m_path.push_back(get_path(connector));
 			//m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
