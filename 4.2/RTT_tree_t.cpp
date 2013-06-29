@@ -29,8 +29,8 @@ Point_2 /*RRT_tree_t::*/get_nn_by_direction(
 	const Vector_2& dir
 )
 {
-	double max_cos_angle = 0;
-	Point_2 nearest;
+	double max_cos_angle = -1.1;
+	Point_2 nearest = pts.front();
 	for(std::vector<Point_2>::const_iterator n_begin(pts.begin()), n_end(pts.end()); n_begin != n_end; ++n_begin)
 	{
 		Vector_2 vec(from,*n_begin);
@@ -91,15 +91,13 @@ Point_d RRT_tree_t::to_pointd(const Point_2& r1, const Point_2& r2)
 
 void RRT_tree_t::expand(size_t samples)
 {
-	std::vector<Point_d> nn;
 	for(size_t i(0); i < samples; )
 	{
 		Point_d q_rand = m_sampler.generate_sample_no_obstacles();
-		nn.resize(0);
-		m_knn_container.k_nearest_neighbors(q_rand,1,std::back_inserter(nn));//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
-		Point_d q_near = nn.front();
+		Point_d q_near = m_knn_container.nearest_neighbor(q_rand);//virtual_graph_nearest_neighbor(q_rand);//m_knn_container.nearest_neighbor(q_rand);
 		Point_d q_new = new_from_direction_oracle(q_near,q_rand);
-		if (!m_local_planner.local_planner(q_new,q_near)) //TODO: across whole path?
+		
+		if (!m_local_planner.local_planner(q_new,q_near,false)) //whole path, no obstacles
 		{
 			continue;
 		}

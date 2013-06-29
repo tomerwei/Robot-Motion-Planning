@@ -59,10 +59,10 @@ public:
 class LocalPlanner {
 public: 
   explicit LocalPlanner(const CollisionDetector& cd);
-  bool local_planner(const Point_d &start, const Point_d &target ) const;
+  bool local_planner(const Point_d &start, const Point_d &target, bool with_obstacles = true ) const;
 private:
   bool local_planner_one_robot(const Point_2& start, const Point_2& target, const Polygon_set_2& obstacles, double eps);
-  bool local_planner_two_robot(const Point_2& start_r1, const Point_2& target_r1, const Point_2& start_r2, const Point_2& target_r2, double eps) const;
+  bool local_planner_two_robot(const Point_2& start_r1, const Point_2& target_r1, const Point_2& start_r2, const Point_2& target_r2, double eps, bool with_obstacles) const;
 
   ////////////////////////
   // Data Members

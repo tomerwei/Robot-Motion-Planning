@@ -143,7 +143,8 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 		                                         const Point_2& target_r1,
 		                                         const Point_2& start_r2,
 		                                         const Point_2& target_r2,
-		                                         double eps ) const
+		                                         double eps,
+												 bool with_obstacles) const
 {
 	//robot 1 calc
 	double x1_r1 = CGAL::to_double(start_r1.x());
@@ -188,7 +189,14 @@ bool LocalPlanner::local_planner_two_robot(const Point_2& start_r1,
 		Point_2 r1_new = start_r1 + step_r1;
 		Point_2 r2_new = start_r2 + step_r2;
 
-		if( !m_cd.valid_conf( r1_new, r2_new ) ) return false;
+		if (with_obstacles)
+		{
+			if( !m_cd.valid_conf( r1_new, r2_new ) ) return false;
+		}
+		else
+		{
+			if ( m_cd.do_moved_robots_interesct(r1_new,r2_new) ) return false;
+		}
 
 		// If an intermidiate configuration is invalid, return false
 		//if (!m_cd.one_robot_valid_conf(currentPos,obstacles)) return false;
@@ -234,7 +242,7 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 	return true;
 }
 
-  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target ) const
+  bool LocalPlanner::local_planner(const Point_d &start, const Point_d &target, bool with_obstacles ) const
   {
 	  double eps = m_cd.m_epsilon;
 	  
@@ -248,7 +256,7 @@ bool LocalPlanner::local_planner_one_robot(const Point_2& start, const Point_2& 
 
 	if( !local_planner_two_robot( robo1_start,robo1_target,
 			                      robo2_start,robo2_target,
-			                      eps ) )
+			                      eps, with_obstacles ) )
 	{
 		return false;
     }
