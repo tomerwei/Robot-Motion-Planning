@@ -148,9 +148,16 @@ void RRT_tree_t::get_nearest_neighbors( Point_d& nearest_to,  std::back_insert_i
 */
 
 
-void RRT_tree_t::get_neighbors(const Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > out ) const
+void RRT_tree_t::get_neighbors( Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > out )
 {
-	m_tree.get_neighbors(pt,out);
+	  point_to_cost_map_t::const_iterator  pIt = vertexID.find( pt );
+	  std::vector<int> pt_ids;
+	  m_tree.get_neighbors(pIt->second,std::back_inserter(pt_ids));
+
+	  BOOST_FOREACH(int id,pt_ids)
+	  {
+	    *++out = vertexIDToPoint.find(id)->second;
+	  }
 }
 
 

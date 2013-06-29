@@ -12,9 +12,6 @@
 #include <map>
 #include <utility>
 
-using namespace std;
-
-
 
 class RRT_tree_t
 {
@@ -30,7 +27,7 @@ public:
 		const Sampler& sampler
 	);
 	void expand(size_t samples);
-	void get_neighbors(const Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > it) const;
+	void get_neighbors(  Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > it) ;
 	const Point_d get_nearest(const Point_d& nearest_to) const;
 	Point_d get_root();
 
@@ -43,7 +40,7 @@ private:
  
 	std::vector<Conf> m_root;
 	mutable Kd_tree_d<Kernel_d> m_knn_container;
-	Graph<Point_d,point_d_less> m_tree;
+	Graph<int, Less_than_int> m_tree;
 	const SRPrm &m_r1_roadmap;
 	const SRPrm &m_r2_roadmap;
 	const LocalPlanner& m_local_planner;
