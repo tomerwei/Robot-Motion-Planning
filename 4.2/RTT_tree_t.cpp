@@ -3,7 +3,7 @@
 RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadmap, const SRPrm& r2_roadmap, const LocalPlanner& local_planner, const Sampler& sampler)
 : m_root(tree_root)
 , m_knn_container()
-, m_tree(0)
+, m_tree()
 , m_r1_roadmap(r1_roadmap)
 , m_r2_roadmap(r2_roadmap)
 , m_local_planner(local_planner)
@@ -18,7 +18,7 @@ RRT_tree_t::RRT_tree_t(const std::vector<Conf>& tree_root, const SRPrm& r1_roadm
 	this->m_tree_root = root ;
 
 	//m_tree.add_vertex(root);
-	m_tree->add_vertex( 1 );
+	m_tree.add_vertex( 1 );
 	vertexID[ root ] = 1;
 	vertexIDToPoint[ 1 ] = root;
 
@@ -65,7 +65,7 @@ Point_d RRT_tree_t::new_from_direction_oracle(const Point_d &pt, const Point_d& 
 			dir2(dir_of.cartesian(2),dir_of.cartesian(3));
 		Vector_2 r1_direction = dir1 - r1_pt;
 		Vector_2 r2_direction = dir2 - r2_pt;
-
+		
 		std::vector<Point_2> pts;
 		m_r1_roadmap.get_neighbors(r1_pt, std::back_inserter(pts));
 
@@ -121,7 +121,7 @@ void RRT_tree_t::expand(size_t samples)
 //			{
 				int q_newId = vertexID.size() + 1;
 
-				m_tree->add_vertex( q_newId );
+				m_tree.add_vertex( q_newId );
 				vertexID[ q_new ] = q_newId;
 				vertexIDToPoint[ q_newId ] = q_new;
 
@@ -129,7 +129,7 @@ void RRT_tree_t::expand(size_t samples)
 
 				int q_near_id = vertexID[ q_near ];
 
-				m_tree->add_edge(q_near_id, q_newId);
+				m_tree.add_edge(q_near_id, q_newId);
 //			}
 		}
 	}
@@ -150,14 +150,7 @@ void RRT_tree_t::get_nearest_neighbors( Point_d& nearest_to,  std::back_insert_i
 
 void RRT_tree_t::get_neighbors(const Point_d& pt, std::back_insert_iterator<std::vector<Point_d> > out ) const
 {
-	point_to_cost_map_t::const_iterator  pIt = vertexID.find( pt );
-	std::vector<int> pt_ids;
-	m_tree->get_neighbors(pIt->second,std::back_inserter(pt_ids));
-
-	BOOST_FOREACH(int id,pt_ids)
-	{
-		*++out = vertexIDToPoint.find(id)->second;
-	}
+	m_tree.get_neighbors(pt,out);
 }
 
 

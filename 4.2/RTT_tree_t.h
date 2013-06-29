@@ -40,11 +40,10 @@ private:
 	Point_d virtual_graph_nearest_neighbor(const Point_d &pt);
 	Point_d to_pointd(const Point_2& r1, const Point_2& r2);
 private:
-    typedef Graph<int, Less_than_int> graph_t;
-
+ 
 	std::vector<Conf> m_root;
 	mutable Kd_tree_d<Kernel_d> m_knn_container;
-	graph_t *m_tree;
+	Graph<Point_d,point_d_less> m_tree;
 	const SRPrm &m_r1_roadmap;
 	const SRPrm &m_r2_roadmap;
 	const LocalPlanner& m_local_planner;
