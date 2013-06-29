@@ -71,9 +71,6 @@ vector <Point_d>  ida_star_successors_get( RRT_tree_t& tree, Point_d node )
 
 
 
-//lets do: root = m_lhs or rhs_conn
-//goal: tree root
-
 
 vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
 										RRT_tree_t& tree,
@@ -205,8 +202,7 @@ vector<Point_d >  dRRT_tree_connector_t::ida_star_depth_limited_search(
 
 vector <Point_d> dRRT_tree_connector_t::ida_algorithm( RRT_tree_t& tree,
 		                                                    Point_d start,
-		                                                    Point_d goal,
-		                                                    std::back_insert_iterator<std::list<Point_d> > out )
+		                                                    Point_d goal )
 {
 	vector     < Point_d >  start_list;
 	vector     < Point_d >  solution;
@@ -227,10 +223,12 @@ vector <Point_d> dRRT_tree_connector_t::ida_algorithm( RRT_tree_t& tree,
      {
    		std::cout << "start " << start << " goal " << goal <<"\n";
 
+   		/*
     	 for( std::vector<Point_d>::const_iterator i = solution.begin(); i != solution.end(); ++i)
     		 std::cout << *i << '\n';
 
     	 std::copy( solution.begin() , solution.end(), out );
+    	 */
      }
 
 	return solution;
@@ -242,19 +240,51 @@ bool a_star_algorithm( Point_d start, Point_d goal )
 	return false;
 }
 
-list < Point_d > dRRT_tree_connector_t::get_path( RRT_tree_t& tree1, Point_d connect_pnt1,
+vector<vector<Conf> > dRRT_tree_connector_t::get_path( RRT_tree_t& tree1, Point_d connect_pnt1,
 													  RRT_tree_t& tree2, Point_d connect_pnt2 )
 {
-	list < Point_d > path1;
-	list < Point_d > path2;
+	list < Point_d > res;
+	vector < Point_d > path1;
+	vector < Point_d > path2;
+	vector<vector<Conf> > result;
 
 	Point_d root1( tree1.get_root() );
-	ida_algorithm( tree1, connect_pnt1 , root1, std::back_inserter(path1) );
+	path1 = ida_algorithm( tree1, connect_pnt1 , root1 );
 
 	Point_d root2( tree2.get_root() );
-	ida_algorithm( tree2, connect_pnt2, root2, std::back_inserter(path2));
+	path2 = ida_algorithm( tree2, connect_pnt2, root2 );
 
+	for( vector<Point_d>::reverse_iterator s = path1.rbegin() ; s != path1.rend() ; s++ )
+	{
+		res.push_back( *s );
 
-	return path1;
+		vector<Conf> tmp;
+		Point_2 robo1_pos( s->cartesian(0),s->cartesian(1) );
+		Point_2 robo2_pos( s->cartesian(2),s->cartesian(3) );
+		tmp.push_back( robo1_pos );
+		tmp.push_back( robo2_pos );
+
+		result.push_back( tmp );
+	}
+
+	for( vector<Point_d>::const_iterator s = path2.begin() ; s != path2.end() ; s++ )
+	{
+		res.push_back( *s );
+
+		vector<Conf> tmp;
+		Point_2 robo1_pos( s->cartesian(0),s->cartesian(1) );
+		Point_2 robo2_pos( s->cartesian(2),s->cartesian(3) );
+		tmp.push_back( robo1_pos );
+		tmp.push_back( robo2_pos );
+
+		result.push_back( tmp );
+	}
+
+	std::cout << "Final list:\n";
+
+	 for( std::list<Point_d>::const_iterator i = res.begin(); i != res.end(); ++i)
+		 std::cout << *i << '\n';
+
+	return result;
 }
 

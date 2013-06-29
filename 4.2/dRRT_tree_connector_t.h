@@ -17,13 +17,13 @@ class dRRT_tree_connector_t
 
 public:
 	dRRT_tree_connector_t(const RRT_tree_t& lhs, const RRT_tree_t& rhs, const Sampler &sampler, const LocalPlanner& lp, size_t p);
-	list < Point_d >  get_path(  RRT_tree_t& tree1, Point_d pnt1, RRT_tree_t& tree2, Point_d pnt2 );
+	vector<vector<Conf> >  get_path(  RRT_tree_t& tree1, Point_d pnt1, RRT_tree_t& tree2, Point_d pnt2 );
 	bool is_connected() const {return m_succeeded;}
 	const Point_d &lhs_conn_pt() const {return m_lhs_conn_pt; }
 	const Point_d &rhs_conn_pt() const {return m_rhs_conn_pt; }
 private:
 	bool local_connect(const Point_d& p1, const Point_d& p2);
-	vector <Point_d > ida_algorithm( RRT_tree_t& tree, Point_d start, Point_d goal, std::back_insert_iterator<std::list<Point_d> > out );
+	vector <Point_d > ida_algorithm( RRT_tree_t& tree, Point_d start, Point_d goal );
 	vector <Point_d >  ida_star_depth_limited_search(
 											RRT_tree_t& tree,
 											Point_d start, Point_d goal,

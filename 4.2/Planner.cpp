@@ -72,8 +72,8 @@ void Planner::run()
 			Point_d src_conn_pt = connector.lhs_conn_pt();
 			Point_d tgt_conn_pt = connector.rhs_conn_pt();
 
-			list < Point_d >  path = connector.get_path( src_tree, src_conn_pt, tgt_tree, tgt_conn_pt );
-
+			//list < Point_d >  path = connector.get_path( src_tree, src_conn_pt, tgt_tree, tgt_conn_pt );
+			m_path = connector.get_path( src_tree, src_conn_pt, tgt_tree, tgt_conn_pt );
 			//m_path = get_path(src_tree, connector.lhs_conn_pt());
 			//m_path.push_back(get_path(connector));
 			//m_path.push_back(get_path(tgt_tree, connector.rhs_conn_pt()));
